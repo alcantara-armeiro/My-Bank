@@ -1164,78 +1164,266 @@ select option[value="oficina"] {
 }
 </style>
 
-<style id="mybank-dashboard-transparente-sem-animacao-final">
-/* DASHBOARD: BOTÕES TRANSPARENTES E SEM ANIMAÇÃO - CSS VISUAL APENAS */
-.dashboard-premium-shine,
-.dashboard-premium-btn .dashboard-premium-shine,
-.bank-nav-card .dashboard-premium-shine,
-[class*="shine"]{display:none!important;content:none!important;}
 
-.dashboard-premium-btn,
-.dashboard-premium-btn *,
-.bank-nav-card,
-.bank-nav-card *,
-.aa-card-button,
-.aa-card-button *,
-.bank-tab-btn,
-.bank-tab-btn *,
-.period-chip,
-.period-chip *{
-  animation:none!important;
-  transition:none!important;
-  transform:none!important;
-  filter:none!important;
-  text-shadow:none!important;
+<style id="mybank-fixas-layout-ajuste-final">
+/* Correção da aba FIXAS: impede sobreposição dos botões, calendário e cards */
+.bank-nav-card{
+  min-height:54px!important;
+  height:54px!important;
+  padding:6px 4px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:2px!important;
+  line-height:1!important;
+  overflow:visible!important;
+  position:relative!important;
+}
+.bank-nav-card .flex{margin:0!important;}
+.bank-nav-card svg{width:15px!important;height:15px!important;}
+
+/* Grid da navegação sempre ocupa duas linhas limpas no celular */
+#root .grid.grid-cols-4.gap-1\.5.mb-4{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:8px!important;
+  margin-bottom:16px!important;
+  align-items:stretch!important;
+  overflow:visible!important;
+}
+
+.month-nav-fix{
+  display:grid!important;
+  grid-template-columns:48px minmax(0,1fr) 48px!important;
+  gap:10px!important;
+  margin:0 0 14px 0!important;
+  position:relative!important;
+  z-index:1!important;
+}
+.month-nav-fix button{
+  width:48px!important;
+  height:48px!important;
+  min-width:48px!important;
+  min-height:48px!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+.month-nav-fix select{
+  width:100%!important;
+  min-width:0!important;
+  height:48px!important;
+  min-height:48px!important;
+  padding:0 12px!important;
+  text-align:center!important;
+}
+
+/* Aba FIXAS com espaçamento estável */
+#root .space-y-4.animate-fadeIn{
+  position:relative!important;
+  z-index:1!important;
+}
+#root .space-y-4.animate-fadeIn > *{
+  position:relative!important;
+  z-index:auto!important;
+}
+
+/* Remove definitivamente seleção/visual de oficina em contas fixas */
+select option[value="oficina"]{display:none!important;}
+</style>
+
+
+
+<style id="mybank-fixas-nav-correto-sem-animacao-final">
+/* AJUSTE FINAL: botões da navegação/dashboard transparentes, estáticos e sem ocupar área gigante.
+   Apenas CSS visual: não altera JavaScript, cálculos, dados, fórmulas nem funções. */
+
+/* Grade dos botões do Bank/Dashboard: altura normal, sem sobreposição */
+#root .grid.grid-cols-4.gap-1\.5.mb-4,
+#root .grid.grid-cols-4.gap-1\.5.mb-4.sm\:grid-cols-8{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  grid-auto-rows:58px!important;
+  gap:8px!important;
+  align-items:stretch!important;
+  justify-items:stretch!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  margin:0 0 16px 0!important;
+  padding:0!important;
+  overflow:visible!important;
+  position:relative!important;
+  z-index:2!important;
+  background:transparent!important;
+  background-image:none!important;
   box-shadow:none!important;
 }
 
-.dashboard-premium-btn:hover,.dashboard-premium-btn:active,.dashboard-premium-btn:focus,
-.bank-nav-card:hover,.bank-nav-card:active,.bank-nav-card:focus,
-.aa-card-button:hover,.aa-card-button:active,.aa-card-button:focus,
-.bank-tab-btn:hover,.bank-tab-btn:active,.bank-tab-btn:focus,
-.period-chip:hover,.period-chip:active,.period-chip:focus{
+/* Cada botão da dashboard/navegação */
+#root .grid.grid-cols-4.gap-1\.5.mb-4 > .bank-nav-card,
+#root .grid.grid-cols-4.gap-1\.5.mb-4.sm\:grid-cols-8 > .bank-nav-card,
+.bank-nav-card,
+.dashboard-premium-btn{
+  height:58px!important;
+  min-height:58px!important;
+  max-height:58px!important;
+  width:auto!important;
+  min-width:0!important;
+  padding:6px 4px!important;
+  margin:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:3px!important;
+  line-height:1!important;
+  overflow:hidden!important;
+  position:relative!important;
+  inset:auto!important;
+  transform:none!important;
   animation:none!important;
   transition:none!important;
+  filter:none!important;
+  box-shadow:none!important;
+  text-shadow:none!important;
+  background:transparent!important;
+  background-image:none!important;
+  border:1.5px solid rgba(212,175,55,.68)!important;
+  color:#d4af37!important;
+}
+
+/* Estado ativo/selecionado também transparente */
+.bank-nav-card.gold-gradient,
+.dashboard-premium-btn.gold-gradient,
+.gold-gradient.bank-nav-card,
+.gold-gradient.dashboard-premium-btn,
+#root .grid.grid-cols-4.gap-1\.5.mb-4 > .bank-nav-card.gold-gradient,
+#root .grid.grid-cols-4.gap-1\.5.mb-4.sm\:grid-cols-8 > .bank-nav-card.gold-gradient{
+  background:transparent!important;
+  background-image:none!important;
+  border:1.5px solid rgba(212,175,55,.68)!important;
+  color:#d4af37!important;
+  box-shadow:none!important;
   transform:none!important;
+}
+
+/* Sem reação nenhuma ao tocar, focar ou passar mouse */
+.bank-nav-card:hover,
+.bank-nav-card:active,
+.bank-nav-card:focus,
+.dashboard-premium-btn:hover,
+.dashboard-premium-btn:active,
+.dashboard-premium-btn:focus{
+  background:transparent!important;
+  background-image:none!important;
+  transform:none!important;
+  animation:none!important;
+  transition:none!important;
   filter:none!important;
   box-shadow:none!important;
   outline:none!important;
 }
 
-.dashboard-premium-btn,
-.bank-nav-card,
-.aa-card-button,
-.bank-tab-btn,
-.period-chip,
-.dashboard-premium-btn.gold-gradient,
-.bank-nav-card.gold-gradient,
-.bank-tab-btn.gold-gradient,
-.period-chip.gold-gradient,
-.gold-gradient.bank-nav-card,
-.gold-gradient.dashboard-premium-btn{
+/* Conteúdo interno dos botões */
+.bank-nav-card *,
+.dashboard-premium-btn *,
+.bank-nav-card svg,
+.dashboard-premium-btn svg{
   background:transparent!important;
   background-image:none!important;
-  box-shadow:none!important;
-  border:1.5px solid rgba(212,175,55,.68)!important;
-  color:#d4af37!important;
-}
-
-.dashboard-premium-btn *,
-.bank-nav-card *,
-.aa-card-button *,
-.bank-tab-btn *,
-.period-chip *,
-.dashboard-premium-btn svg,
-.bank-nav-card svg,
-.aa-card-button svg,
-.bank-tab-btn svg,
-.period-chip svg{
   color:#d4af37!important;
   stroke:#d4af37!important;
   fill:none!important;
+  box-shadow:none!important;
+  filter:none!important;
+  text-shadow:none!important;
+  transform:none!important;
+  animation:none!important;
+  transition:none!important;
+}
+.bank-nav-card .flex,
+.dashboard-premium-btn .flex{
+  margin:0!important;
+  height:16px!important;
+  min-height:16px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+.bank-nav-card svg,
+.dashboard-premium-btn svg{
+  width:15px!important;
+  height:15px!important;
+  display:block!important;
+}
+.dashboard-premium-shine,
+.bank-nav-card .dashboard-premium-shine,
+.dashboard-premium-btn .dashboard-premium-shine,
+[class*="shine"],
+[class*="glow"]{
+  display:none!important;
+  content:none!important;
+}
+
+/* Controle do mês na aba Fixas: não sobe para cima da navegação */
+.month-nav-fix,
+#root .space-y-4.animate-fadeIn > .grid.grid-cols-3:first-child{
+  display:grid!important;
+  grid-template-columns:52px minmax(0,1fr) 52px!important;
+  gap:10px!important;
+  margin:0 0 16px 0!important;
+  align-items:center!important;
+  position:relative!important;
+  z-index:1!important;
+  height:auto!important;
+  min-height:52px!important;
+  overflow:visible!important;
+  background:transparent!important;
+}
+.month-nav-fix button,
+#root .space-y-4.animate-fadeIn > .grid.grid-cols-3:first-child button{
+  width:52px!important;
+  min-width:52px!important;
+  height:52px!important;
+  min-height:52px!important;
+  max-height:52px!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
   background:transparent!important;
   background-image:none!important;
+  border:1.5px solid rgba(212,175,55,.68)!important;
   box-shadow:none!important;
+  transform:none!important;
+  animation:none!important;
+  transition:none!important;
+}
+.month-nav-fix select,
+#root .space-y-4.animate-fadeIn > .grid.grid-cols-3:first-child select{
+  width:100%!important;
+  min-width:0!important;
+  height:52px!important;
+  min-height:52px!important;
+  padding:0 12px!important;
+  text-align:center!important;
+  text-align-last:center!important;
+  background:#050505!important;
+  color:#d4af37!important;
+  border:1.5px solid rgba(212,175,55,.68)!important;
+  box-shadow:none!important;
+}
+
+@media(max-width:380px){
+  #root .grid.grid-cols-4.gap-1\.5.mb-4,
+  #root .grid.grid-cols-4.gap-1\.5.mb-4.sm\:grid-cols-8{gap:6px!important;grid-auto-rows:56px!important;}
+  .bank-nav-card,.dashboard-premium-btn{height:56px!important;min-height:56px!important;max-height:56px!important;font-size:8px!important;}
+  .month-nav-fix,#root .space-y-4.animate-fadeIn > .grid.grid-cols-3:first-child{grid-template-columns:48px minmax(0,1fr) 48px!important;gap:8px!important;}
+  .month-nav-fix button,#root .space-y-4.animate-fadeIn > .grid.grid-cols-3:first-child button{width:48px!important;min-width:48px!important;height:48px!important;min-height:48px!important;}
+  .month-nav-fix select,#root .space-y-4.animate-fadeIn > .grid.grid-cols-3:first-child select{height:48px!important;min-height:48px!important;}
 }
 </style>
 
@@ -3529,6 +3717,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
         }, { total: 0, pessoal: 0, oficina: 0 });
     }, [selectedCardEntriesForMonth]);
     const fixedBillsForSelectedMonth = useMemo(() => fixedBills
+        .filter(b => (b.area || 'pessoal') === 'pessoal')
         .filter(b => b.active !== false && compareYM(selectedMonth, getBillStartMonth(b)) >= 0)
         .sort((a, b) => parseInt(a.day, 10) - parseInt(b.day, 10)), [fixedBills, selectedMonth]);
     const fixedBillsSelectedSummary = useMemo(() => fixedBillsForSelectedMonth.reduce((acc, b) => {
@@ -3991,7 +4180,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
         return (React.createElement("div", { style: { height, borderRadius: height, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' } },
             React.createElement("div", { style: { height: '100%', width: `${p}%`, background: c, borderRadius: height, transition: 'width .5s ease-out' } })));
     };
-    const MonthNav = () => (React.createElement("div", { className: "flex items-center gap-2 mb-4" },
+    const MonthNav = () => (React.createElement("div", { className: "month-nav-fix flex items-center gap-2 mb-4" },
         React.createElement("button", { onClick: () => { const i = availableMonths.indexOf(selectedMonth); if (i < availableMonths.length - 1)
                 setSelectedMonth(availableMonths[i + 1]); }, className: "btn-icon text-gray-400 bg-white/5 rounded-xl w-9 h-9", disabled: availableMonths.indexOf(selectedMonth) === availableMonths.length - 1 },
             React.createElement(BankUiIcon, { name: "chevron-left", size: 16, color: "#9ca3af" })),
@@ -4263,14 +4452,14 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                         React.createElement("option", { value: "oficina" }, "Oficina"))),
                 React.createElement("div", { className: "grid grid-cols-2 gap-3" },
                     React.createElement("button", { onClick: saveBill, className: "gold-gradient p-3 rounded-xl font-usarmy text-xs" }, editingBillId ? 'ATUALIZAR' : 'SALVAR'),
-                    React.createElement("button", { onClick: () => { setEditingBillId(null); setBillForm({ name: '', value: '', date: isoToday(), area: 'oficina', active: true }); setShowBillForm(false); }, className: "p-3 rounded-xl border border-white/10 text-gray-400 font-usarmy text-xs" }, "CANCELAR")))),
+                    React.createElement("button", { onClick: () => { setEditingBillId(null); setBillForm({ name: '', value: '', date: isoToday(), area: 'pessoal', active: true }); setShowBillForm(false); }, className: "p-3 rounded-xl border border-white/10 text-gray-400 font-usarmy text-xs" }, "CANCELAR")))),
             fixedBills.length > 0 && (React.createElement("div", { className: "os-card p-3 rounded-xl" },
                 React.createElement("div", { className: "flex justify-between items-center" },
                     React.createElement("span", { className: "font-usarmy text-xs text-gray-400" }, "TOTAL FIXO DO M\u00CAS"),
                     React.createElement("span", { className: "font-usarmy text-[#d4af37] text-sm" }, money(fixedBillsSelectedSummary.total))),
                 React.createElement("div", { className: "grid grid-cols-2 gap-2 mt-2" }, ['pessoal'].map(area => {
                     const m = AREA_META[area];
-                    const total = fixedBillsForSelectedMonth.filter(b => (b.area || 'oficina') === area).reduce((s, b) => s + Number(b.value || 0), 0);
+                    const total = fixedBillsForSelectedMonth.filter(b => (b.area || 'pessoal') === area).reduce((s, b) => s + Number(b.value || 0), 0);
                     return total > 0 ? (React.createElement("div", { key: area, className: "bg-white/5 rounded-lg p-2" },
                         React.createElement("p", { className: "text-[8px] font-mono", style: { color: m.color } }, m.label),
                         React.createElement("p", { className: "font-usarmy text-xs text-white" }, money(total)))) : null;
@@ -4278,7 +4467,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
             React.createElement("div", { className: "space-y-2" },
                 fixedBillsForSelectedMonth.length === 0 && (React.createElement("div", { className: "os-card p-10 rounded-xl text-center text-gray-600 font-usarmy text-xs" }, "NENHUMA CONTA FIXA NESTE M\u00CAS")),
                 fixedBillsForSelectedMonth.map(b => {
-                    const meta = AREA_META[b.area || 'oficina'];
+                    const meta = AREA_META[b.area || 'pessoal'];
                     const status = getBillMonthStatus(b, selectedMonth);
                     const { paid, urgent, overdue, waiting, daysUntil, dueDate, started } = status;
                     const badgeBorder = paid
@@ -4299,7 +4488,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                                 React.createElement("div", null,
                                     React.createElement("p", { className: "text-sm font-bold text-white" }, b.name),
                                     React.createElement("div", { className: "flex items-center gap-2 mt-0.5 flex-wrap" },
-                                        React.createElement(AreaBadge, { area: b.area || 'oficina', size: "xs" }),
+                                        React.createElement(AreaBadge, { area: b.area || 'pessoal', size: "xs" }),
                                         React.createElement("span", { className: "text-[8px] px-1.5 py-0.5 rounded-full bg-white/5 text-gray-400 border border-white/10" }, dueDate ? `VENC. ${String(dueDate.getDate()).padStart(2, '0')}` : `INÍCIO ${String(b.day).padStart(2, '0')}`),
                                         paid && (React.createElement("span", { className: "text-[8px] font-bold px-1.5 py-0.5 rounded-full border text-emerald-400 bg-emerald-500/10 border-emerald-500/30" }, "PAGA")),
                                         !paid && !started && (React.createElement("span", { className: "text-[8px] font-bold px-1.5 py-0.5 rounded-full border text-blue-400 bg-blue-500/10 border-blue-500/30" }, "AGUARDANDO IN\u00CDCIO")),
@@ -4936,6 +5125,26 @@ SafeStorage.ready.finally(() => {
       setTimeout(function(){if(s&&s.parentNode)s.parentNode.removeChild(s);},800);
     },2500);
   });
+})();
+</script>
+
+
+<script id="github-pages-cache-clean-fix">
+(function(){
+  try{
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(regs){
+        regs.forEach(function(reg){ reg.update(); });
+      });
+    }
+    if (window.caches && !localStorage.getItem('mybank_github_cache_clean_v2')) {
+      caches.keys().then(function(keys){
+        return Promise.all(keys.map(function(k){ return caches.delete(k); }));
+      }).then(function(){
+        localStorage.setItem('mybank_github_cache_clean_v2','1');
+      });
+    }
+  }catch(e){}
 })();
 </script>
 

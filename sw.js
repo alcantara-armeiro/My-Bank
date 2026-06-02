@@ -1,12 +1,32 @@
-const CACHE_NAME = 'mybank-preservado-v2';
+const CACHE_NAME = 'mybank-github-fix-v3';
+
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(['./', './index.html', './manifest.json', './icon.svg'])));
   self.skipWaiting();
 });
+
 self.addEventListener('activate', event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))));
-  self.clients.claim();
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
 });
+
 self.addEventListener('fetch', event => {
-  event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request)));
+  const request = event.request;
+
+  if (request.mode === 'navigate' || request.destination === 'document') {
+    event.respondWith(fetch(request).catch(() => caches.match('./index.html')));
+    return;
+  }
+
+  event.respondWith(
+    caches.match(request).then(cached => {
+      return cached || fetch(request).then(response => {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(request, copy)).catch(() => {});
+        return response;
+      });
+    })
+  );
 });
