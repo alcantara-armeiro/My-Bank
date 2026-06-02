@@ -1427,6 +1427,31 @@ select option[value="oficina"]{display:none!important;}
 }
 </style>
 
+
+<style id="remover-cards-icones-fixas">
+/* Remove os quadrados dos botões ✓ ✏️ 🗑️ das contas fixas */
+.bill-actions button,
+.fixed-actions button,
+[class*="bill"] button.btn-icon,
+[class*="fixed"] button.btn-icon{
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    min-width: auto !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 8px !important;
+}
+
+.bill-actions button svg,
+.fixed-actions button svg,
+[class*="bill"] button.btn-icon svg,
+[class*="fixed"] button.btn-icon svg{
+    width: 22px !important;
+    height: 22px !important;
+}
+</style>
+
 </head>
 
 <body>
@@ -5125,26 +5150,6 @@ SafeStorage.ready.finally(() => {
       setTimeout(function(){if(s&&s.parentNode)s.parentNode.removeChild(s);},800);
     },2500);
   });
-})();
-</script>
-
-
-<script id="github-pages-cache-clean-fix">
-(function(){
-  try{
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(function(regs){
-        regs.forEach(function(reg){ reg.update(); });
-      });
-    }
-    if (window.caches && !localStorage.getItem('mybank_github_cache_clean_v2')) {
-      caches.keys().then(function(keys){
-        return Promise.all(keys.map(function(k){ return caches.delete(k); }));
-      }).then(function(){
-        localStorage.setItem('mybank_github_cache_clean_v2','1');
-      });
-    }
-  }catch(e){}
 })();
 </script>
 
