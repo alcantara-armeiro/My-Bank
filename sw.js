@@ -1,6 +1,6 @@
 const CACHE_NAME = 'mybank-preservado-v2';
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(['./', './index.html', './manifest.json', './icon.svg'])));
+  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(['./', './index.html', './manifest.json', './icon.png'])));
   self.skipWaiting();
 });
 self.addEventListener('activate', event => {
