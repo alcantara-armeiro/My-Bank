@@ -1429,71 +1429,79 @@ select option[value="oficina"]{display:none!important;}
 
 
 
-<style id="remover-cards-icones-fixas-final-real">
-/* Remove os quadrados/cards dos botões ✓ editar excluir dentro das contas fixas */
 
-/* Alvo principal: botões de ação que ficam dentro dos cards de contas fixas */
-.os-card button:has(svg),
-.os-card button.btn-icon,
-.os-card button[class*="border"],
-.os-card button[class*="rounded"]{
+
+
+
+<style id="ajuste-final-icones-sem-card">
+/* Ajuste final: somente ícones nas contas urgentes e lista de contas fixas */
+.urgent-check-only,
+.fixa-icon-only,
+#root button.urgent-check-only,
+#root button.fixa-icon-only{
+    all: unset !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     background: transparent !important;
     background-image: none !important;
-    border: none !important;
-    border-color: transparent !important;
-    outline: none !important;
+    border: 0 !important;
+    outline: 0 !important;
     box-shadow: none !important;
-    filter: none !important;
-}
-
-/* Mantém botão grande NOVA CONTA FIXA intacto */
-.os-card button.gold-gradient,
-button.gold-gradient,
-.gold-gradient{
-    background: #d4af37 !important;
-    color: #050505 !important;
-    border: 1.5px solid #d4af37 !important;
-}
-
-/* Botões pequenos da linha da conta fixa: só o ícone, sem caixa */
-.os-card .flex button:has(svg),
-.os-card .grid button:has(svg),
-.os-card > div button:has(svg){
-    width: 32px !important;
-    min-width: 32px !important;
-    max-width: 32px !important;
-    height: 32px !important;
-    min-height: 32px !important;
-    max-height: 32px !important;
-    padding: 0 !important;
-    margin: 0 4px !important;
     border-radius: 0 !important;
-    background: transparent !important;
-    background-image: none !important;
-    border: none !important;
-    box-shadow: none !important;
-}
-
-/* Ícones */
-.os-card button:has(svg) svg{
-    width: 22px !important;
-    height: 22px !important;
-    color: #d4af37 !important;
-    stroke: #d4af37 !important;
-    fill: none !important;
-}
-
-/* Sem efeito ao tocar */
-.os-card button:has(svg):hover,
-.os-card button:has(svg):active,
-.os-card button:has(svg):focus{
-    background: transparent !important;
-    background-image: none !important;
-    border: none !important;
-    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 7px !important;
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+    max-width: 24px !important;
+    max-height: 24px !important;
     transform: none !important;
     filter: none !important;
-    outline: none !important;
+    animation: none !important;
+    transition: none !important;
+    cursor: pointer !important;
+}
+.urgent-check-only:hover,
+.urgent-check-only:active,
+.urgent-check-only:focus,
+.fixa-icon-only:hover,
+.fixa-icon-only:active,
+.fixa-icon-only:focus{
+    all: unset !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+    max-width: 24px !important;
+    max-height: 24px !important;
+    padding: 0 !important;
+    margin: 0 7px !important;
+    background: transparent !important;
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+}
+.urgent-check-only svg,
+.fixa-icon-only svg,
+#root button.urgent-check-only svg,
+#root button.fixa-icon-only svg{
+    width: 24px !important;
+    height: 24px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    fill: none !important;
+}
+button.gold-gradient,
+.gold-gradient{
+    background:#d4af37 !important;
+    color:#050505 !important;
+    border:1.5px solid #d4af37 !important;
 }
 </style>
 
@@ -4471,9 +4479,9 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                                     t.type === 'saida' ? '-' : '+·',
                                     money(t.value)),
                                 React.createElement("div", { className: "flex gap-1 mt-2 justify-end" },
-                                    React.createElement("button", { onClick: () => editTransaction(t), className: "btn-icon text-[#d4af37] w-8 h-8", "aria-label": "Editar" },
+                                    React.createElement("button", { onClick: () => editTransaction(t), className: "fixa-icon-only text-[#d4af37]", "aria-label": "Editar" },
                                         React.createElement(BankUiIcon, { name: "pencil", size: 14, color: "#d4af37" })),
-                                    React.createElement("button", { onClick: () => setConfirmDelete(t.id), className: "btn-icon text-red-500 w-8 h-8", "aria-label": "Excluir" },
+                                    React.createElement("button", { onClick: () => setConfirmDelete(t.id), className: "fixa-icon-only text-red-500", "aria-label": "Excluir" },
                                         React.createElement(BankUiIcon, { name: "trash-2", size: 14, color: "#ef4444" })))))));
                 })))),
         tab === 'fixas' && (React.createElement("div", { className: "space-y-4 animate-fadeIn" },
@@ -4500,7 +4508,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                         React.createElement("p", { className: "text-[9px]", style: { color: b.overdue ? '#ef4444' : '#eab308' } }, b.overdue ? `Venceu há ${Math.abs(b.daysUntil)} dias` : b.daysUntil === 0 ? 'Vence HOJE' : `Vence em ${b.daysUntil} dias`)),
                     React.createElement("div", { className: "flex items-center gap-2" },
                         React.createElement("p", { className: "font-usarmy text-yellow-400 text-sm" }, money(b.value)),
-                        React.createElement("button", { onClick: () => toggleBillPaid(b), className: "btn-icon w-8 h-8 text-emerald-400", "aria-label": "Marcar como paga", title: "Marcar como paga" },
+                        React.createElement("button", { onClick: () => toggleBillPaid(b), className: "urgent-check-only", "aria-label": "Marcar como paga", title: "Marcar como paga" },
                             React.createElement(BankUiIcon, { name: "check", size: 14, color: "#22c55e" })))))))),
             !showBillForm && (React.createElement("button", { onClick: () => { setShowBillForm(true); setEditingBillId(null); setBillForm({ name: '', value: '', date: `${selectedMonth}-01`, area: 'pessoal', active: true }); }, className: "gold-gradient w-full p-4 rounded-xl font-usarmy text-xs flex items-center justify-center gap-2" },
                 React.createElement(BankUiIcon, { name: "plus", size: 16, color: "#d4af37" }),
@@ -4567,11 +4575,11 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                             React.createElement("div", { className: "text-right" },
                                 React.createElement("p", { className: "font-usarmy text-[#d4af37] text-sm" }, money(b.value)),
                                 React.createElement("div", { className: "flex gap-1 mt-1.5 justify-end" },
-                                    React.createElement("button", { onClick: () => toggleBillPaid(b), className: `btn-icon w-8 h-8 ${paid ? 'text-emerald-400' : 'text-gray-400'}`, "aria-label": paid ? 'Desmarcar como paga' : 'Marcar como paga', title: paid ? 'Desmarcar como paga' : 'Marcar como paga' },
+                                    React.createElement("button", { onClick: () => toggleBillPaid(b), className: `fixa-icon-only ${paid ? 'text-emerald-400' : 'text-gray-400'}`, "aria-label": paid ? 'Desmarcar como paga' : 'Marcar como paga', title: paid ? 'Desmarcar como paga' : 'Marcar como paga' },
                                         React.createElement(BankUiIcon, { name: "check", size: 14, color: paid ? '#22c55e' : '#9ca3af' })),
-                                    React.createElement("button", { onClick: () => editBill(b), className: "btn-icon text-[#d4af37] w-8 h-8", "aria-label": "Editar" },
+                                    React.createElement("button", { onClick: () => editBill(b), className: "fixa-icon-only text-[#d4af37]", "aria-label": "Editar" },
                                         React.createElement(BankUiIcon, { name: "pencil", size: 14, color: "#d4af37" })),
-                                    React.createElement("button", { onClick: () => removeFixedBill(b.id), className: "btn-icon text-red-500 w-8 h-8", "aria-label": "Excluir" },
+                                    React.createElement("button", { onClick: () => removeFixedBill(b.id), className: "fixa-icon-only text-red-500", "aria-label": "Excluir" },
                                         React.createElement(BankUiIcon, { name: "trash-2", size: 14, color: "#ef4444" })))))));
                 })))),
         tab === 'cartoes' && (React.createElement("div", { className: "space-y-4 animate-fadeIn" },
@@ -4654,9 +4662,9 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                                 React.createElement("div", { className: "text-right flex-shrink-0" },
                                     React.createElement("p", { className: "font-usarmy text-red-400 text-sm" }, money(cardTotal)),
                                     React.createElement("div", { className: "flex gap-1 mt-2 justify-end" },
-                                        React.createElement("button", { onClick: () => editCard(card), className: "btn-icon text-[#d4af37] w-8 h-8", "aria-label": "Editar cart\u00E3o" },
+                                        React.createElement("button", { onClick: () => editCard(card), className: "fixa-icon-only text-[#d4af37]", "aria-label": "Editar cart\u00E3o" },
                                             React.createElement(BankUiIcon, { name: "pencil", size: 14, color: "#d4af37" })),
-                                        React.createElement("button", { onClick: () => setConfirmDeleteCard(card.id), className: "btn-icon text-red-500 w-8 h-8", "aria-label": "Excluir cart\u00E3o" },
+                                        React.createElement("button", { onClick: () => setConfirmDeleteCard(card.id), className: "fixa-icon-only text-red-500", "aria-label": "Excluir cart\u00E3o" },
                                             React.createElement(BankUiIcon, { name: "trash-2", size: 14, color: "#ef4444" })))))));
                     })))),
             selectedCard && (React.createElement(React.Fragment, null,
@@ -4821,9 +4829,9 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                                             "de ",
                                             money(entry.totalPurchaseValue || entry.value)),
                                         React.createElement("div", { className: "flex gap-1 mt-2 justify-end" },
-                                            React.createElement("button", { onClick: () => editCardEntry(entry), className: "btn-icon text-[#d4af37] w-8 h-8", "aria-label": "Editar gasto do cart\u00E3o" },
+                                            React.createElement("button", { onClick: () => editCardEntry(entry), className: "fixa-icon-only text-[#d4af37]", "aria-label": "Editar gasto do cart\u00E3o" },
                                                 React.createElement(BankUiIcon, { name: "pencil", size: 14, color: "#d4af37" })),
-                                            React.createElement("button", { onClick: () => setConfirmDeleteCardEntry(entry.id), className: "btn-icon text-red-500 w-8 h-8", "aria-label": "Excluir gasto do cart\u00E3o" },
+                                            React.createElement("button", { onClick: () => setConfirmDeleteCardEntry(entry.id), className: "fixa-icon-only text-red-500", "aria-label": "Excluir gasto do cart\u00E3o" },
                                                 React.createElement(BankUiIcon, { name: "trash-2", size: 14, color: "#ef4444" })))))));
                         }))))))))),
         tab === 'fechamento' && (React.createElement("div", { className: "space-y-4 animate-fadeIn" },
