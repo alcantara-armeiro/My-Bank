@@ -1,747 +1,9 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Bank</title>
 
-    <!-- PWA Meta Tags Otimizadas -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="My Bank">
-    <meta name="theme-color" content="#050505">
-    <meta name="background-color" content="#050505">
-    <meta name="description" content="My Bank">
-    <meta name="robots" content="noindex, nofollow">
 
-    <!-- Ícones Apple Touch - Múltiplos tamanhos -->
-    <link rel="apple-touch-icon" sizes="72x72" href="icons/icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="96x96" href="icons/icon-96x96.png">
-    <link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128x128.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="icons/icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192x192.png">
-    <link rel="apple-touch-icon" sizes="384x384" href="icons/icon-384x384.png">
-    <link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512x512.png">
 
-    <!-- Ícone Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16x16.png">
 
-    <!-- Manifesto PWA -->
-    <link rel="manifest" href="manifest.json">
 
-    <!-- Scripts -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
 
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
-
-        * { -webkit-tap-highlight-color: transparent; }
-
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background: #050505; 
-            color: #e5e5e5; 
-            margin: 0; 
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            overscroll-behavior-y: none;
-        }
-
-        .font-usarmy { font-family: 'Black Ops One', cursive; letter-spacing: 0.05em; }
-        .font-mono { font-family: 'JetBrains Mono', monospace; }
-
-        .gold-gradient { background: #d4af37 !important; color: black !important; font-weight: 700 !important; }
-        .gold-gradient:active { 
-            background-position: right center;
-            transform: scale(0.98);
-        }
-
-        .os-card { 
-            background: linear-gradient(145deg, #0d0d0d 0%, #0a0a0a 100%);
-            border: 1px solid rgba(212, 175, 55, 0.08);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
-
-        input, textarea, select { 
-            background: #0f0f0f !important; 
-            border: 1.5px solid rgba(255,255,255,0.08) !important; 
-            color: white !important; 
-            outline: none;
-            transition: all 0.2s ease;
-            font-size: 16px;
-        }
-        input:focus, textarea:focus, select:focus { 
-            border-color: #d4af37 !important;
-            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
-        }
-
-        .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
-        
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 9px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
-        .btn-icon {
-            min-height: 44px;
-            min-width: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1a1a1a;
-            border: 1px solid #d4af37;
-            padding: 12px 24px;
-            border-radius: 12px;
-            z-index: 1000;
-
-        }
-
-        
-            to { opacity: 1; transform: translate(-50%, 0); }
-        }
-
-        .loading-spinner {
-            border: 2px solid rgba(212, 175, 55, 0.1);
-            border-top-color: #d4af37;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-
-        }
-
-        
-        }
-
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.8);
-
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-        }
-
-        .modal-content {
-            background: #0d0d0d;
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            border-radius: 16px;
-            max-width: 90%;
-            width: 400px;
-
-        }
-
-        .install-prompt {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
-            color: #000;
-            padding: 16px 24px;
-            border-radius: 12px;
-            font-family: 'Black Ops One', cursive;
-            font-size: 14px;
-            z-index: 9999;
-            box-shadow: 0 8px 32px rgba(212, 175, 55, 0.3);
-
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            border: none;
-            width: 90%;
-            max-width: 400px;
-            justify-content: center;
-        }
-
-        .install-prompt:active {
-            transform: translateX(-50%) scale(0.98);
-        }
-
-        @media print {
-            .no-print { display: none !important; }
-            body { background: white; color: black; }
-        }
-
-        option:disabled {
-            color: #666;
-            background: #1a1a1a;
-        }
-
-        .discount-input {
-            background: linear-gradient(145deg, #1a1a1a 0%, #0f0f0f 100%) !important;
-            border: 1.5px solid rgba(212, 175, 55, 0.3) !important;
-        }
-        .discount-input:focus {
-            border-color: #d4af37 !important;
-            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
-        }        
-
-        .payment-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-        .payment-badge.paid {
-            background: rgba(34, 197, 94, 0.2);
-            color: #22c55e;
-            border: 1px solid rgba(34, 197, 94, 0.3);
-        }
-        .payment-badge.pending {
-            background: rgba(234, 179, 8, 0.2);
-            color: #eab308;
-            border: 1px solid rgba(234, 179, 8, 0.3);
-        }
-
-        /* Animação de shake para erros */
-        
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-        .shake {
-
-        }
-
-        /* Scrollbar customizada */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0a0a0a;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #d4af37;
-            border-radius: 3px;
-        }
-
- 
-        /* Indicador de alterações não salvas */
-        
-            50% { opacity: 0.4; }
-        }
-        .dirty-indicator {
-
-        }
-
-        /* Campo de data com label flutuante */
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(1) sepia(1) saturate(5) hue-rotate(10deg);
-            opacity: 0.6;
-            cursor: pointer;
-        }
-
-        /* Contador de resultados */
-        .results-count {
-            font-size: 9px;
-            color: #6b7280;
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        /* ── BANK SENIOR EDITION ── */
-        .wallet-card {
-            border-radius: 16px;
-            padding: 16px;
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .wallet-card:active {
-            transform: scale(0.98);
-        }
-        .wallet-personal {
-            background: linear-gradient(135deg, #1a1a3e 0%, #0f0f2d 100%);
-            border: 1px solid rgba(99,102,241,0.3);
-        }
-        .wallet-workshop {
-            background: linear-gradient(135deg, #1a1500 0%, #0f0d00 100%);
-            border: 1px solid rgba(212,175,55,0.3);
-        }
-        .bank-tab-btn {
-            transition: all 0.2s ease;
-        }
-        .bank-tab-btn:active { transform: scale(0.95); }
-        .area-toggle-btn {
-            border-radius: 12px;
-            padding: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        .cross-area-toggle {
-            width: 44px;
-            height: 24px;
-            border-radius: 12px;
-            transition: background 0.2s ease;
-            display: flex;
-            align-items: center;
-            flex-shrink: 0;
-        }
-        .cross-area-toggle-knob {
-            width: 16px;
-            height: 16px;
-            background: white;
-            border-radius: 50%;
-            margin: 4px;
-            transition: transform 0.2s ease;
-        }
-        .cashflow-bar { border-radius: 2px; transition: height 0.4s ease; }
-        .bill-urgent { border-color: rgba(234,179,8,0.4) !important; }
-        .bill-overdue { border-color: rgba(239,68,68,0.4) !important; }
-        
-            50% { opacity: 0.7; transform: scale(1.1); }
-        }
-        .urgent-badge { animation: pulse-badge 1.5s ease-in-out infinite; }
-
-
-        .dashboard-premium-btn {
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.22s ease, background 0.22s ease;
-
-        }
-        .dashboard-premium-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 0 12px rgba(212,175,55,0.16), 0 0 28px rgba(212,175,55,0.08);
-        }
-        .dashboard-premium-btn:active {
-            transform: scale(0.98);
-        }
-        .dashboard-premium-btn .dashboard-premium-shine {
-            position: absolute;
-            inset-block: 0;
-            left: -35%;
-            width: 32%;
-            pointer-events: none;
-
-            transform: skewX(-20deg);
-        }
-        .dashboard-premium-btn .dashboard-premium-inner {
-            position: relative;
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        .dashboard-premium-card {
-            min-height: 72px;
-        }
-        .dashboard-premium-card .dashboard-premium-label {
-            font-size: 10px;
-            color: #9ca3af;
-            letter-spacing: 0.08em;
-            line-height: 1;
-            margin-bottom: 3px;
-        }
-        .dashboard-premium-card .dashboard-premium-title {
-            font-size: 11px;
-            line-height: 1.15;
-        }
-
-
-        /* SPLASH PREMIUM */
-        
-            50% { transform: translateY(-4px) scale(1.01); }
-        }
-        
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-            50% { opacity: 0.38; transform: scale(1.03); }
-        }
-        
-            100% { width: 100%; opacity: 1; }
-        }
-        .splash-logo-wrap {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-
-        }
-        .splash-logo-glow {
-            position: absolute;
-            inset: -14px;
-            border-radius: 9999px;
-            background: radial-gradient(circle, rgba(212,175,55,0.26) 0%, rgba(212,175,55,0.10) 45%, rgba(212,175,55,0) 75%);
-            filter: blur(18px);
-
-        }
-        .splash-fade-up {
-
-        }
-        .splash-title-gold {
-            color: #d4af37;
-            text-shadow: 0 0 16px rgba(212,175,55,0.22);
-        }
-        .splash-loading-track {
-            width: 180px;
-            max-width: 72vw;
-            height: 4px;
-            border-radius: 9999px;
-            background: rgba(255,255,255,0.08);
-            overflow: hidden;
-            margin: 16px auto 0;
-        }
-        .splash-loading-bar {
-            height: 100%;
-            border-radius: 9999px;
-            background: linear-gradient(90deg, #8a6a10 0%, #d4af37 55%, #f0d77a 100%);
-
-        }
-
-    
-        /* LOGOS PREMIUM ANIMADOS */
-        .logo-premium-animated{
-            position:relative;
-            overflow:hidden;
-            flex-shrink:0;
-            background-size:cover !important;
-            background-position:center !important;
-            background-repeat:no-repeat !important;
-            box-shadow:
-                0 0 0 1px rgba(212,175,55,0.10),
-                0 0 14px rgba(212,175,55,0.16),
-                inset 0 0 10px rgba(212,175,55,0.08);
-        }
-        .logo-premium-animated::before{
-            content:"";
-            position:absolute;
-            inset:-32%;
-            background:radial-gradient(circle, rgba(212,175,55,0.20) 0%, rgba(143,184,90,0.10) 40%, rgba(212,175,55,0) 72%);
-
-            pointer-events:none;
-        }
-        .logo-premium-animated::after{
-            content:"";
-            position:absolute;
-            top:-25%;
-            left:-70%;
-            width:42%;
-            height:150%;
-            background:linear-gradient(
-                115deg,
-                rgba(255,255,255,0) 0%,
-                rgba(255,255,255,0.10) 35%,
-                rgba(255,230,150,0.58) 50%,
-                rgba(255,255,255,0.10) 65%,
-                rgba(255,255,255,0) 100%
-            );
-            transform:skewX(-20deg);
-
-            pointer-events:none;
-        }
-        
-            10%{opacity:1;}
-            45%{opacity:1;}
-            100%{left:145%;opacity:0;}
-        }
-        
-            50%{transform:scale(1.08);opacity:1;}
-        }
-        .assistencia-logo-premium{
-            background-image:url('./icons/logo.jpg?v=19');
-            border-radius:9999px;
-            border:2px solid rgba(111,143,66,0.38);
-        }
-
-    </style>
-
-<style>
-.tech-calculator-input{
-    font-size:16px !important;
-    transform:translateZ(0);
-    -webkit-user-select:text;
-    user-select:text;
-    touch-action:manipulation;
-}
-
-.tech-calculator-input:focus{
-    outline:none !important;
-    border-color:#d4af37 !important;
-    box-shadow:0 0 0 2px rgba(212,175,55,0.25) !important;
-}
-
-input.tech-calculator-input{
-    appearance:textfield;
-    -moz-appearance:textfield;
-}
-
-input.tech-calculator-input::-webkit-outer-spin-button,
-input.tech-calculator-input::-webkit-inner-spin-button{
-    -webkit-appearance:none;
-    margin:0;
-}
-</style>
-
-
-
-
-<style id="alcantara-final-exemplo-100">
-:root{
-  --aa-bg:#050505;
-  --aa-panel:#080808;
-  --aa-card:#050505;
-  --aa-gold:#d4af37;
-  --aa-gold-2:#e0bc43;
-  --aa-border:rgba(212,175,55,.68);
-  --aa-border-soft:rgba(212,175,55,.38);
-  --aa-muted:#9ca3af;
-  --aa-muted2:#6b7280;
-  --aa-red:#ff6b75;
-  --aa-green:#22c55e;
-}
-html,body,#root{background:var(--aa-bg)!important;color:var(--aa-muted)!important;}
-*{-webkit-tap-highlight-color:transparent!important;}
-/* Sem neon, sem animação, sem mudança ao tocar */
-*,*::before,*::after{animation:none!important;transition:none!important;text-shadow:none!important;box-shadow:none!important;}
-button:active,button:hover,button:focus,[role="button"]:active,[role="button"]:hover,[role="button"]:focus{transform:none!important;filter:none!important;box-shadow:none!important;outline:none!important;}
-.logo-premium-animated::before,.logo-premium-animated::after,.dashboard-premium-shine,.splash-logo-glow,[class*="shine"],[class*="glow"]{display:none!important;content:none!important;}
-.logo-premium-animated,.assistencia-logo-premium,img{box-shadow:none!important;filter:none!important;}
-
-/* Base visual do exemplo: cards pretos/transparentes com borda dourada */
-.aa-card,
-.os-card,
-.wallet-card,
-.wallet-personal,
-.wallet-workshop,
-.profit-card,
-.metric-highlight,
-.breakdown-item,
-.modal-content,
-.area-toggle-btn,
-.payment-badge,
-.status-badge,
-.period-chip,
-.tab-inactive,
-.dashboard-premium-card,
-.dashboard-premium-btn:not(.gold-gradient),
-.bank-nav-card.aa-card-button{
-  background:transparent!important;
-  background-image:none!important;
-  border:1.5px solid var(--aa-border)!important;
-  color:var(--aa-gold)!important;
-  box-shadow:none!important;
-  filter:none!important;
-}
-
-/* Remove fundos coloridos internos de cards, incluindo bolhas do Bank */
-.aa-card-overlay{display:none!important;}
-.wallet-card [class*="bg-"],.wallet-personal [class*="bg-"],.wallet-workshop [class*="bg-"],
-.os-card [class*="bg-"],.profit-card [class*="bg-"],.metric-highlight [class*="bg-"],.breakdown-item [class*="bg-"],
-.card-missoes [class*="bg-"],.card-faturamento [class*="bg-"],.card-pagas [class*="bg-"],.card-pendentes [class*="bg-"],.card-lucro [class*="bg-"],.card-custos [class*="bg-"]{
-  background:transparent!important;background-image:none!important;
-}
-.aa-icon-badge,
-.wallet-card .rounded-full,
-.os-card .rounded-full,
-.profit-card .rounded-full,
-.metric-highlight .rounded-full,
-.breakdown-item .rounded-full,
-.dashboard-premium-card .rounded-full,
-.dashboard-premium-btn:not(.gold-gradient) .rounded-full{
-  background:transparent!important;
-  border:1.5px solid var(--aa-border-soft)!important;
-}
-
-/* Textos principais/valores em dourado */
-.font-usarmy,
-.os-card .font-usarmy,.wallet-card .font-usarmy,.profit-card .font-usarmy,.metric-highlight .font-usarmy,.breakdown-item .font-usarmy,
-.dashboard-premium-card .font-usarmy,.dashboard-premium-btn:not(.gold-gradient) .font-usarmy,
-.card-missoes .font-usarmy,.card-faturamento .font-usarmy,.card-pagas .font-usarmy,.card-pendentes .font-usarmy,.card-lucro .font-usarmy,.card-custos .font-usarmy,
-.os-card strong,.wallet-card strong,.profit-card strong,.metric-highlight strong,
-[class*="text-[#d4af37]"]{color:var(--aa-gold)!important;}
-
-/* Subtítulos e textos descritivos cinza */
-.text-gray-300,.text-gray-400,.text-gray-500,.text-gray-600,.text-gray-700,
-.font-mono,label,small,.results-count,
-.os-card p:not(.font-usarmy),.wallet-card p:not(.font-usarmy),.profit-card p:not(.font-usarmy),.metric-highlight p:not(.font-usarmy),.breakdown-item p:not(.font-usarmy),
-.dashboard-premium-label,.dashboard-premium-btn:not(.gold-gradient) p:not(.font-usarmy),.dashboard-premium-card p:not(.font-usarmy){color:var(--aa-muted)!important;}
-
-/* Ícones de cards/navegação no padrão dourado */
-.os-card svg,.wallet-card svg,.profit-card svg,.metric-highlight svg,.breakdown-item svg,
-.dashboard-premium-card svg,.dashboard-premium-btn:not(.gold-gradient) svg,
-.card-missoes svg,.card-faturamento svg,.card-pagas svg,.card-pendentes svg,.card-lucro svg,.card-custos svg,
-.bank-nav-card.aa-card-button svg,footer svg,nav svg{
-  color:var(--aa-gold)!important;stroke:var(--aa-gold)!important;fill:none!important;
-}
-
-/* Botões de ação do exemplo: dourado sólido com texto/ícone preto */
-.gold-gradient,
-.tab-active,
-.install-prompt,
-button[class*="gold-gradient"],
-button.bg-yellow-500,button.bg-yellow-400,
-input[type="button"],input[type="submit"],input[type="reset"]{
-  background:var(--aa-gold)!important;
-  background-image:none!important;
-  color:#000!important;
-  border:1.5px solid var(--aa-gold)!important;
-  box-shadow:none!important;
-}
-.gold-gradient *,.gold-gradient svg,.tab-active *,.tab-active svg,.install-prompt *,.install-prompt svg,
-button[class*="gold-gradient"] *,button[class*="gold-gradient"] svg{
-  color:#000!important;stroke:#000!important;fill:none!important;
-}
-.gold-gradient:hover,.gold-gradient:active,.gold-gradient:focus,.tab-active:hover,.tab-active:active,.tab-active:focus{background:var(--aa-gold)!important;color:#000!important;}
-
-/* Botões comuns dentro de grids/cards: contorno dourado, não preenchidos */
-.aa-card-button,
-button.bg-white\/5,
-button.border-white\/10,
-.tab-inactive,
-.period-chip:not(.tab-active){
-  background:transparent!important;
-  background-image:none!important;
-  color:var(--aa-gold)!important;
-  border:1.5px solid var(--aa-border)!important;
-}
-.aa-card-button *,.aa-card-button svg,button.bg-white\/5 svg,button.border-white\/10 svg,.tab-inactive svg{color:var(--aa-gold)!important;stroke:var(--aa-gold)!important;}
-
-/* Bank especificamente: remove roxo/marrom dos cards de saldo */
-.wallet-personal,.wallet-workshop,.wallet-card{
-  background:transparent!important;background-image:none!important;border-color:var(--aa-border)!important;color:var(--aa-gold)!important;
-}
-.wallet-personal *, .wallet-workshop *, .wallet-card *{color:var(--aa-gold)!important;}
-.wallet-personal .font-mono,.wallet-workshop .font-mono,.wallet-card .font-mono,
-.wallet-personal p:not(.font-usarmy),.wallet-workshop p:not(.font-usarmy),.wallet-card p:not(.font-usarmy){color:var(--aa-muted)!important;}
-.wallet-card .text-green-400,.wallet-personal .text-green-400,.wallet-workshop .text-green-400{color:var(--aa-green)!important;}
-.wallet-card .text-red-400,.wallet-personal .text-red-400,.wallet-workshop .text-red-400{color:var(--aa-red)!important;}
-
-/* Extrato/relatórios/análise: sem vermelho/azul/verde nos cards, tudo padrão do app */
-.card-missoes,.card-faturamento,.card-pagas,.card-pendentes,.card-lucro,.card-custos,
-.profit-card,.metric-highlight,.breakdown-item{
-  background:transparent!important;background-image:none!important;border-color:var(--aa-border)!important;
-}
-.card-missoes *,.card-faturamento *,.card-pagas *,.card-pendentes *,.card-lucro *,.card-custos *,
-.profit-card *,.metric-highlight *,.breakdown-item *{color:var(--aa-gold)!important;}
-.profit-card p:not(.font-usarmy),.metric-highlight p:not(.font-usarmy),.breakdown-item p:not(.font-usarmy){color:var(--aa-muted)!important;}
-
-/* Campos */
-input,textarea,select{
-  background:#080808!important;background-image:none!important;color:#e5e5e5!important;border:1.5px solid var(--aa-border-soft)!important;box-shadow:none!important;outline:none!important;
-}
-input:focus,textarea:focus,select:focus{border-color:var(--aa-gold)!important;box-shadow:none!important;}
-option{background:#050505!important;color:#e5e5e5!important;}
-
-/* Barras e gráficos simples */
-.profit-bar,.cashflow-bar,.splash-loading-bar{background:var(--aa-gold)!important;background-image:none!important;}
-.profit-bar-container{background:rgba(255,255,255,.08)!important;}
-
-/* Bordas Tailwind coloridas viram douradas dentro do padrão */
-.os-card[class*="border-"],.profit-card[class*="border-"],.wallet-card[class*="border-"],.metric-highlight[class*="border-"]{border-color:var(--aa-border)!important;}
-
-/* Rodapé e header coerentes */
-header,footer,nav{background:#050505!important;}
-header svg,footer svg,nav svg{stroke:var(--aa-gold)!important;color:var(--aa-gold)!important;}
-header button.gold-gradient svg,footer button.gold-gradient svg,nav button.gold-gradient svg{stroke:#000!important;color:#000!important;}
-
-/* Cards de alerta ficam ainda no padrão, mas texto crítico permanece legível */
-.text-red-400,.text-rose-400{color:var(--aa-red)!important;}
-.text-green-400,.text-emerald-400{color:var(--aa-green)!important;}
-
-::-webkit-scrollbar-track{background:#050505!important;}
-::-webkit-scrollbar-thumb{background:var(--aa-gold)!important;border-radius:3px!important;}
-
-
-
-/* ===== AJUSTE FINAL SEM NEON/PREENCHIMENTO ===== */
-
-button:has([data-lucide="message-circle"]),
-button:has(.lucide-message-circle),
-button:has([data-lucide="calculator"]),
-button:has([data-lucide="plus"]),
-button:has([data-lucide="clipboard-plus"]){
-    background: transparent !important;
-    background-image:none !important;
-    box-shadow:none !important;
-    filter:none !important;
-}
-
-/* Avisar pronto */
-button:has([data-lucide="message-circle"]),
-button:has(.lucide-message-circle){
-    border:1.5px solid rgba(34,197,94,.45) !important;
-}
-
-/* Nova ordem e calculadoras */
-button:has([data-lucide="calculator"]),
-button:has([data-lucide="plus"]),
-button:has([data-lucide="clipboard-plus"]){
-    border:1.5px solid rgba(212,175,55,.55) !important;
-}
-
-/* Remove qualquer preenchimento interno */
-button *,
-.dashboard-premium-btn *,
-.aa-card-button *{
-    background:none !important;
-    box-shadow:none !important;
-    filter:none !important;
-}
-    
-/* força remoção em cards */
-.os-card .status-badge,
-.os-card [class*="status"]{
-    border:none !important;
-    outline:none !important;
-    box-shadow:none !important;
-}
-
-
-
-/* remove azul interno */
-[class*="tech"]{
-    background: transparent !important;
-    background-image:none !important;
-    box-shadow:none !important;
-}
-
-/* textos e ícones dourados */
-button:has([data-lucide="gauge"]) *,
-button:has([data-lucide="cpu"]) *,
-button:has([data-lucide="wrench"]) *,
-button:has([data-lucide="calculator"]) *{
-    color:#d4af37 !important;
-    stroke:#d4af37 !important;
-}
-
-</style>
-
-
-<script>
 window.addEventListener('error', function(e){
  var root=document.getElementById('root');
  if(root && !root.innerHTML.trim()){root.innerHTML='<pre style="white-space:pre-wrap;color:#ff6b75;background:#050505;padding:24px;font:16px monospace">Erro no My Bank: '+(e.message||'Script error')+'\n'+(e.filename||'')+':'+(e.lineno||0)+':'+(e.colno||0)+'</pre>'}
@@ -750,543 +12,14 @@ window.addEventListener('unhandledrejection', function(e){
  var root=document.getElementById('root');
  if(root && !root.innerHTML.trim()){root.innerHTML='<pre style="white-space:pre-wrap;color:#ff6b75;background:#050505;padding:24px;font:16px monospace">Erro no My Bank: '+((e.reason&&e.reason.message)||e.reason||'Promise error')+'</pre>'}
 });
-</script>
 
 
-<style id="mybank-senior-ui-upgrade">
-:root{
-  --mb-bg:#050505;
-  --mb-panel:#090909;
-  --mb-card:#0d0d0d;
-  --mb-card-2:#111111;
-  --mb-gold:#d4af37;
-  --mb-gold-soft:rgba(212,175,55,.18);
-  --mb-gold-border:rgba(212,175,55,.58);
-  --mb-muted:#9ca3af;
-  --mb-text:#f4f4f5;
-  --mb-green:#22c55e;
-  --mb-red:#ef4444;
-}
-
-/* Layout geral mais limpo no celular */
-body{
-  background:
-    radial-gradient(circle at top, rgba(212,175,55,.10), transparent 28%),
-    linear-gradient(180deg,#050505 0%,#080808 50%,#050505 100%) !important;
-}
-
-#root{
-  min-height:100vh;
-}
-
-/* Container interno do app */
-main,
-.animate-fadeIn,
-[class*="max-w"],
-[class*="container"]{
-  scroll-behavior:smooth;
-}
-
-/* Header mais premium */
-header{
-  position:sticky !important;
-  top:0;
-  z-index:50;
-  background:rgba(5,5,5,.92)!important;
-  backdrop-filter:blur(14px);
-  -webkit-backdrop-filter:blur(14px);
-  border-bottom:1px solid rgba(212,175,55,.18)!important;
-}
-
-/* Título com respiro */
-header .font-usarmy,
-h1.font-usarmy,
-h2.font-usarmy{
-  letter-spacing:.08em!important;
-}
-
-/* Cards principais */
-.wallet-card,
-.os-card,
-.profit-card,
-.metric-highlight,
-.breakdown-item,
-.dashboard-premium-card,
-.bank-nav-card,
-.aa-card,
-[class*="rounded-xl"],
-[class*="rounded-2xl"]{
-  border-radius:18px!important;
-}
-
-/* Carteira/saldo com destaque de dashboard */
-.wallet-card{
-  padding:20px!important;
-  min-height:138px!important;
-  background:
-    linear-gradient(145deg,rgba(212,175,55,.12),rgba(255,255,255,.025) 42%,rgba(0,0,0,.12)),
-    #0b0b0b!important;
-  border:1.5px solid rgba(212,175,55,.50)!important;
-  box-shadow:0 16px 40px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.04)!important;
-}
-
-.wallet-card::after{
-  content:"";
-  position:absolute;
-  width:150px;
-  height:150px;
-  border-radius:999px;
-  right:-60px;
-  top:-70px;
-  background:radial-gradient(circle,rgba(212,175,55,.20),transparent 65%);
-  pointer-events:none;
-}
-
-.wallet-card .font-usarmy{
-  font-size:clamp(22px,7vw,34px)!important;
-  line-height:1.05!important;
-}
-
-/* Grid dos cards mais compacto e alinhado */
-.grid{
-  gap:12px!important;
-}
-
-.os-card,
-.profit-card,
-.metric-highlight,
-.breakdown-item,
-.dashboard-premium-card,
-.bank-nav-card,
-.aa-card-button{
-  background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.012))!important;
-  border:1px solid rgba(212,175,55,.28)!important;
-  box-shadow:0 10px 26px rgba(0,0,0,.30)!important;
-}
-
-/* Cards de métricas menores e mais legíveis */
-.profit-card,
-.metric-highlight,
-.dashboard-premium-card{
-  padding:14px!important;
-  min-height:86px!important;
-}
-
-.profit-card p,
-.metric-highlight p,
-.dashboard-premium-card p{
-  line-height:1.2!important;
-}
-
-/* Botões grandes mais bonitos e fáceis de tocar */
-button,
-[role="button"]{
-  min-height:46px;
-  border-radius:14px!important;
-  font-weight:800!important;
-}
-
-button.gold-gradient,
-.gold-gradient,
-.tab-active{
-  background:linear-gradient(135deg,#f2d675 0%,#d4af37 42%,#a87912 100%)!important;
-  color:#050505!important;
-  border:1px solid rgba(255,226,136,.9)!important;
-  box-shadow:0 8px 22px rgba(212,175,55,.18)!important;
-}
-
-button.gold-gradient *,
-.gold-gradient *,
-.tab-active *{
-  color:#050505!important;
-  stroke:#050505!important;
-}
-
-/* Botões secundários */
-button:not(.gold-gradient):not(.tab-active),
-.aa-card-button,
-.tab-inactive{
-  background:rgba(255,255,255,.035)!important;
-  border:1px solid rgba(212,175,55,.34)!important;
-  color:#d4af37!important;
-}
-
-button:not(.gold-gradient):not(.tab-active) svg,
-.aa-card-button svg,
-.tab-inactive svg{
-  color:#d4af37!important;
-  stroke:#d4af37!important;
-}
-
-/* Navegação/abas mais moderna */
-.bank-tab-btn,
-.period-chip,
-.tab-active,
-.tab-inactive{
-  min-height:42px!important;
-  padding:10px 12px!important;
-  border-radius:999px!important;
-  font-size:11px!important;
-}
-
-/* Formulários mais profissionais */
-input,
-textarea,
-select{
-  min-height:48px!important;
-  border-radius:14px!important;
-  background:#0b0b0b!important;
-  border:1.5px solid rgba(212,175,55,.24)!important;
-  padding-left:14px!important;
-  padding-right:14px!important;
-}
-
-textarea{
-  padding-top:12px!important;
-}
-
-label{
-  font-size:11px!important;
-  letter-spacing:.04em!important;
-  text-transform:uppercase;
-  color:#b7b7b7!important;
-}
-
-/* Lista/extrato */
-.breakdown-item,
-.os-card{
-  padding:14px!important;
-}
-
-.payment-badge,
-.status-badge{
-  border-radius:999px!important;
-  padding:5px 10px!important;
-}
-
-/* Ajustes mobile */
-@media (max-width:480px){
-  body{font-size:14px!important;}
-  .p-6{padding:16px!important;}
-  .p-5{padding:14px!important;}
-  .p-4{padding:12px!important;}
-  .gap-4{gap:12px!important;}
-  .gap-3{gap:10px!important;}
-
-  .wallet-card{
-    min-height:126px!important;
-    padding:18px!important;
-  }
-
-  .grid-cols-2{
-    gap:10px!important;
-  }
-
-  .font-usarmy{
-    letter-spacing:.06em!important;
-  }
-
-  button{
-    min-height:44px;
-  }
-}
-
-/* Remove visual de área empresarial/oficina definitivamente */
-.wallet-workshop,
-select option[value="oficina"],
-.area-toggle-btn:nth-child(n+2){
-  display:none!important;
-}
-
-/* Realce visual da área pessoal */
-.wallet-personal{
-  background:
-    linear-gradient(145deg,rgba(212,175,55,.14),rgba(255,255,255,.025) 42%,rgba(0,0,0,.10)),
-    #0b0b0b!important;
-  border-color:rgba(212,175,55,.55)!important;
-}
-
-/* Rodapé/nav mais limpo */
-footer,
-nav{
-  background:rgba(5,5,5,.94)!important;
-  backdrop-filter:blur(14px);
-  -webkit-backdrop-filter:blur(14px);
-  border-top:1px solid rgba(212,175,55,.16)!important;
-}
-
-/* Pequenos refinamentos */
-::-webkit-scrollbar{width:4px!important}
-::-webkit-scrollbar-thumb{background:#d4af37!important;border-radius:999px!important}
-::selection{background:rgba(212,175,55,.35);color:#fff}
-</style>
-
-
-
-
-
-<style id="wallet-professional-size-fix">
-/* Ajuste profissional do card de saldo */
-.wallet-card,
-.wallet-personal{
-  width:100% !important;
-  max-width:none !important;
-  grid-column:1 / -1 !important;
-  min-height:155px !important;
-  padding:20px !important;
-}
-
-/* Título PESSOAL menor e mais elegante */
-.wallet-card .font-usarmy,
-.wallet-personal .font-usarmy{
-  font-size:clamp(26px, 7vw, 34px) !important;
-  line-height:1.05 !important;
-  letter-spacing:.055em !important;
-}
-
-/* Valor do saldo sem exagero */
-.wallet-card p,
-.wallet-personal p{
-  line-height:1.25 !important;
-}
-
-/* Textos menores dentro do card */
-.wallet-card .font-mono,
-.wallet-personal .font-mono{
-  font-size:12px !important;
-}
-
-/* Mobile */
-@media (max-width:480px){
-  .wallet-card,
-  .wallet-personal{
-    min-height:145px !important;
-    padding:18px !important;
-  }
-
-  .wallet-card .font-usarmy,
-  .wallet-personal .font-usarmy{
-    font-size:30px !important;
-  }
-}
-</style>
-
-
-<style id="mybank-lancar-card-unico-real">
-/* Aba Lançar: retirado o card de empresa/oficina. Fica somente Pessoal. */
-.os-card p + .grid.grid-cols-2:has(button) {
-  grid-template-columns: 1fr !important;
-}
-.os-card p + .grid.grid-cols-2:has(button) > button {
-  width: 100% !important;
-  min-height: 72px !important;
-  justify-content: center !important;
-  border-radius: 20px !important;
-}
-
-/* Segurança: se alguma opção antiga ainda existir em selects, não aparece */
-select option[value="oficina"] {
-  display: none !important;
-}
-</style>
-
-
-<style id="mybank-final-dashboard-splash">
-#splashScreen{
-  position:fixed;
-  inset:0;
-  background:radial-gradient(circle at center,rgba(212,175,55,.10),transparent 34%),#050505;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  z-index:999999;
-}
-#splashLogo{
-  width:178px;
-  height:178px;
-  border-radius:50%;
-  object-fit:cover;
-  border:1.5px solid rgba(212,175,55,.55);
-  box-shadow:0 0 34px rgba(212,175,55,.34);
-}
-#splashTitle{
-  margin-top:22px;
-  color:#d4af37;
-  font-family:'Black Ops One',cursive;
-  font-size:32px;
-  letter-spacing:.08em;
-}
-#splashSubtitle{
-  margin-top:8px;
-  color:#a3a3a3;
-  font-size:13px;
-}
-#splashScreen.splash-hide{
-  opacity:0;
-  transition:opacity .75s ease;
-  pointer-events:none;
-}
-.mybank-top-logo{
-  width:38px!important;
-  height:38px!important;
-  min-width:38px!important;
-  border-radius:50%!important;
-  object-fit:cover!important;
-  border:1.5px solid rgba(212,175,55,.70)!important;
-  box-shadow:0 0 14px rgba(212,175,55,.20)!important;
-  display:block!important;
-}
-.wallet-card,
-.wallet-personal{
-  text-align:center!important;
-}
-.wallet-card > div:first-child,
-.wallet-personal > div:first-child{
-  justify-content:center!important;
-}
-.wallet-card .font-usarmy,
-.wallet-personal .font-usarmy,
-.wallet-card p,
-.wallet-personal p{
-  text-align:center!important;
-}
-</style>
-
-
-<style id="mybank-remover-cards-oficina-caixa-fix">
-/* Aba CAIXA/FECHAMENTO: remove visualmente o card da OFICINA, mantendo somente o card PESSOAL. */
-#root .space-y-4.animate-fadeIn > .grid.grid-cols-1.gap-3 > .os-card > .grid.grid-cols-2.gap-3{
-  grid-template-columns:1fr!important;
-}
-#root .space-y-4.animate-fadeIn > .grid.grid-cols-1.gap-3 > .os-card > .grid.grid-cols-2.gap-3 > div:nth-child(2){
-  display:none!important;
-}
-</style>
-
-
-<style id="mybank-fixas-layout-ajuste-final">
-/* Correção da aba FIXAS: impede sobreposição dos botões, calendário e cards */
-.bank-nav-card{
-  min-height:54px!important;
-  height:54px!important;
-  padding:6px 4px!important;
-  display:flex!important;
-  flex-direction:column!important;
-  align-items:center!important;
-  justify-content:center!important;
-  gap:2px!important;
-  line-height:1!important;
-  overflow:visible!important;
-  position:relative!important;
-}
-.bank-nav-card .flex{margin:0!important;}
-.bank-nav-card svg{width:15px!important;height:15px!important;}
-
-/* Grid da navegação sempre ocupa duas linhas limpas no celular */
-#root .grid.grid-cols-4.gap-1\.5.mb-4{
-  display:grid!important;
-  grid-template-columns:repeat(4,minmax(0,1fr))!important;
-  gap:8px!important;
-  margin-bottom:16px!important;
-  align-items:stretch!important;
-  overflow:visible!important;
-}
-
-.month-nav-fix{
-  display:grid!important;
-  grid-template-columns:48px minmax(0,1fr) 48px!important;
-  gap:10px!important;
-  margin:0 0 14px 0!important;
-  position:relative!important;
-  z-index:1!important;
-}
-.month-nav-fix button{
-  width:48px!important;
-  height:48px!important;
-  min-width:48px!important;
-  min-height:48px!important;
-  padding:0!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-}
-.month-nav-fix select{
-  width:100%!important;
-  min-width:0!important;
-  height:48px!important;
-  min-height:48px!important;
-  padding:0 12px!important;
-  text-align:center!important;
-}
-
-/* Aba FIXAS com espaçamento estável */
-#root .space-y-4.animate-fadeIn{
-  position:relative!important;
-  z-index:1!important;
-}
-#root .space-y-4.animate-fadeIn > *{
-  position:relative!important;
-  z-index:auto!important;
-}
-
-/* Remove definitivamente seleção/visual de oficina em contas fixas */
-select option[value="oficina"]{display:none!important;}
-</style>
-
-
-<style id="dashboard-sem-animacao-final">
-.dashboard-premium-btn,
-.bank-nav-card,
-.bank-tab-btn,
-.wallet-card,
-.wallet-personal,
-button,
-[role="button"]{
-    animation:none !important;
-    transition:none !important;
-}
-
-.dashboard-premium-btn:hover,
-.dashboard-premium-btn:active,
-.bank-nav-card:hover,
-.bank-nav-card:active,
-.bank-tab-btn:hover,
-.bank-tab-btn:active,
-.wallet-card:hover,
-.wallet-card:active,
-.wallet-personal:hover,
-.wallet-personal:active,
-button:hover,
-button:active{
-    transform:none !important;
-    box-shadow:none !important;
-    filter:none !important;
-}
-</style>
-
-</head>
-
-<body>
-
-<div id="splashScreen">
-  <img id="splashLogo" src="./icons/logo.png" alt="My Bank">
-  <div id="splashTitle">MY BANK</div>
-  <div id="splashSubtitle">Gestão Financeira</div>
-</div>
-
-    <div id="root"></div>
-    <div id="toast-container"></div>
-    <div id="install-container"></div>
-
-
-    <script>
         // ===== STORAGE BRIDGE V11 CLEAN BACKUP =====
         const SafeStorage = (() => {
-            const DB_NAME = 'alcantara_pro_storage_v8';
+            const DB_NAME = 'mybank_storage_v2';
             const STORE = 'kv';
             const VERSION = 1;
-            const MIGRATION_FLAG = '__alcantara_idb_migrated_v8__';
+            const MIGRATION_FLAG = '__mybank_idb_migrated_v2__';
             const memory = {};
             let dbPromise = null;
             let readyResolve;
@@ -1294,10 +27,7 @@ button:active{
 
             const cloneValue = (v) => v === undefined ? null : String(v);
             const keysToMirror = [
-                'alcantara_os','alcantara_catalog','alcantara_products','alcantara_bank_transactions','alcantara_bank_fixed',
-                'alcantara_bank_budgets','alcantara_bank_cards','alcantara_bank_card_entries','gf_fornecedores','gf_pecas',
-                'gf_margem','alcantara_assistencias_registros','alcantara_customer_notes','alcantara_last_bench_os',
-                'alcantara_auth','alcantara_equipment_history','alcantara_tech_maintenances'
+                'mybank_transactions','mybank_fixed','mybank_budgets','mybank_cards','mybank_card_entries','mybank_withdrawal_limit','mybank_debt_plan'
             ];
 
             function openDb() {
@@ -1366,7 +96,7 @@ button:active{
                         for (let i = 0; i < localStorage.length; i++) {
                             const key = localStorage.key(i);
                             if (!key) continue;
-                            if (!keysToMirror.includes(key) && !key.startsWith('alcantara_') && !key.startsWith('gf_')) continue;
+                            if (!keysToMirror.includes(key) && !key.startsWith('mybank_')) continue;
                             const value = localStorage.getItem(key);
                             memory[key] = cloneValue(value);
                             pending.push(idbSetItem(key, value));
@@ -1380,7 +110,7 @@ button:active{
                     console.warn('Falha no bootstrap do IndexedDB:', error);
                 } finally {
                     readyResolve();
-                    window.dispatchEvent(new CustomEvent('alcantara-storage-ready'));
+                    window.dispatchEvent(new CustomEvent('mybank-storage-ready'));
                 }
             }
 
@@ -1446,10 +176,8 @@ button:active{
                 },
                 async compactData() {
                     const keys = [
-                        'alcantara_bank_transactions','alcantara_bank_fixed','alcantara_bank_cards','alcantara_bank_card_entries',
-                        'alcantara_bank_budgets','alcantara_os','alcantara_catalog','alcantara_products',
-                        'gf_fornecedores','gf_pecas','alcantara_assistencias_registros','alcantara_customer_notes',
-                        'alcantara_equipment_history','alcantara_tech_maintenances'
+                        'mybank_transactions','mybank_fixed','mybank_cards','mybank_card_entries',
+                        'mybank_budgets','mybank_withdrawal_limit','mybank_debt_plan'
                     ];
                     let cleaned = 0;
                     for (const key of keys) {
@@ -1478,9 +206,8 @@ button:active{
                 }
             };
         })();
-    </script>
+    
 
-    <script>
 const { useState, useEffect, useRef, useCallback, useMemo } = React;
 const safeJsonParse = (rawValue, fallbackValue) => {
     if (rawValue === null || rawValue === undefined || rawValue === '')
@@ -1516,10 +243,7 @@ const downloadJsonFile = (filename, payload) => {
     setTimeout(() => URL.revokeObjectURL(url), 1200);
 };
 const APP_BACKUP_KEYS = [
-    'alcantara_os', 'alcantara_catalog', 'alcantara_products', 'alcantara_bank_transactions', 'alcantara_bank_fixed',
-    'alcantara_bank_budgets', 'alcantara_bank_cards', 'alcantara_bank_card_entries', 'gf_fornecedores', 'gf_pecas',
-    'gf_margem', 'alcantara_assistencias_registros', 'alcantara_customer_notes', 'alcantara_last_bench_os',
-    'alcantara_auth', 'alcantara_equipment_history', 'alcantara_tech_maintenances'
+    'mybank_transactions','mybank_fixed','mybank_budgets','mybank_cards','mybank_card_entries','mybank_withdrawal_limit','mybank_debt_plan'
 ];
 
 const shareJsonFile = async (filename, payload, shareText = 'Backup do app') => {
@@ -1642,7 +366,7 @@ const normalizeCards = (value) => asArray(value)
     .filter(Boolean);
 const normalizeBudgets = (value) => ({
     personal: Number(value === null || value === void 0 ? void 0 : value.personal) > 0 ? Number(value.personal) : 2500,
-    workshop: Number(value === null || value === void 0 ? void 0 : value.workshop) > 0 ? Number(value.workshop) : 1200
+    workshop: 0
 });
 const normalizeFixedBill = (bill, fallbackIndex = 0) => {
     var _a;
@@ -1664,7 +388,7 @@ const normalizeFixedBill = (bill, fallbackIndex = 0) => {
         value,
         date: isIsoDate(bill.date) ? bill.date : `${rawDate.slice(0, 7)}-${String(safeDay).padStart(2, '0')}`,
         day: safeDay,
-        area: bill.area === 'pessoal' ? 'pessoal' : 'oficina',
+        area: 'pessoal',
         active: bill.active !== false,
         paidMonths: Array.isArray(bill.paidMonths)
             ? [...new Set(bill.paidMonths.filter(m => /^\d{4}-\d{2}$/.test(String(m))))]
@@ -1969,11 +693,11 @@ const collectOrderPdfItems = (order) => ([...asArray(order.services).map(i => ({
 const APP_VERSION = "V15.2 PDF PREMIUM";
 const DADOS_EMPRESA = {
     nome: "MY BANK",
-    cpf: "290.350.558-61",
-    endereco: "Rua Franklin do Amaral, 585-casa 3",
-    bairro: "Vila Nova Cachoeirinha",
-    cidade: "São Paulo - SP, 02479000",
-    contato: "(11) 96735-1384 | alcantara.armeiro@gmail.com"
+    cpf: "",
+    endereco: "",
+    bairro: "",
+    cidade: "",
+    contato: ""
 };
 const STATUS_CONFIG = {
     ABERTA: { color: 'bg-yellow-500', text: 'text-yellow-500', bg: 'bg-yellow-500/20', border: 'border-yellow-500/30', label: 'ABERTA' },
@@ -2044,17 +768,17 @@ const showToast = (message, type = 'info') => {
 
 
 // ========== MY BANK BANK V14 — COMPLETE ==========
-const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
-    const BANK_VERSION_LABEL = 'V14.1 PREMIUM';
+const MyBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
+    const BANK_VERSION_LABEL = 'V14.1 PREMIUM LIMPO';
     const now = new Date();
     const currentYM = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     // ── State ──────────────────────────────────────────────────────────
-    const [tab, setTab] = useState(() => localStorage.getItem('alcantara_bank_quick_tab') || 'dashboard');
-    const [transactions, setTransactions] = useState(() => normalizeBankTransactions(safeJsonParse(SafeStorage.getItem('alcantara_bank_transactions'), [])));
-    const [fixedBills, setFixedBills] = useState(() => normalizeFixedBills(safeJsonParse(SafeStorage.getItem('alcantara_bank_fixed'), [])));
-    const [budgets, setBudgets] = useState(() => normalizeBudgets(safeJsonParse(SafeStorage.getItem('alcantara_bank_budgets'), { personal: 2500, workshop: 1200 })));
+    const [tab, setTab] = useState(() => localStorage.getItem('mybank_quick_tab') || 'dashboard');
+    const [transactions, setTransactions] = useState(() => normalizeBankTransactions(safeJsonParse(SafeStorage.getItem('mybank_transactions'), [])));
+    const [fixedBills, setFixedBills] = useState(() => normalizeFixedBills(safeJsonParse(SafeStorage.getItem('mybank_fixed'), [])));
+    const [budgets, setBudgets] = useState(() => normalizeBudgets(safeJsonParse(SafeStorage.getItem('mybank_budgets'), { personal: 2500, workshop: 0 })));
     const [withdrawalLimit, setWithdrawalLimit] = useState(() => {
-        const saved = Number(safeJsonParse(SafeStorage.getItem('alcantara_bank_withdrawal_limit'), 800));
+        const saved = Number(safeJsonParse(SafeStorage.getItem('mybank_withdrawal_limit'), 800));
         return saved > 0 ? saved : 800;
     });
     const [selectedMonth, setSelectedMonth] = useState(currentYM);
@@ -2066,7 +790,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
     const [showBillForm, setShowBillForm] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(null);
     const emptyForm = {
-        area: 'oficina', type: 'entrada', category: 'Serviço', categoryManual: false,
+        area: 'pessoal', type: 'entrada', category: 'Serviço', categoryManual: false,
         description: '', value: '', date: new Date().toISOString().slice(0, 10),
         obs: '', isPersonalExpense: false
     };
@@ -2079,9 +803,9 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
             return nextCategory === prev.category ? prev : { ...prev, category: nextCategory };
         });
     }, [form.area, form.type, form.description, form.obs, form.isPersonalExpense, form.categoryManual]);
-    const [billForm, setBillForm] = useState({ name: '', value: '', date: isoToday(), area: 'oficina', active: true });
-    const [cards, setCards] = useState(() => normalizeCards(safeJsonParse(SafeStorage.getItem('alcantara_bank_cards'), [])));
-    const [cardEntries, setCardEntries] = useState(() => normalizeCardEntries(safeJsonParse(SafeStorage.getItem('alcantara_bank_card_entries'), [])));
+    const [billForm, setBillForm] = useState({ name: '', value: '', date: isoToday(), area: 'pessoal', active: true });
+    const [cards, setCards] = useState(() => normalizeCards(safeJsonParse(SafeStorage.getItem('mybank_cards'), [])));
+    const [cardEntries, setCardEntries] = useState(() => normalizeCardEntries(safeJsonParse(SafeStorage.getItem('mybank_card_entries'), [])));
     const [selectedCardId, setSelectedCardId] = useState(null);
     const defaultDebtPlanState = {
         currentMonthCritical: [
@@ -2124,14 +848,14 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
             nextMonthBase: normalizeList(base.nextMonthBase || defaultDebtPlanState.nextMonthBase, 'next')
         };
     };
-    const [debtPlanData, setDebtPlanData] = useState(() => normalizeDebtPlanState(safeJsonParse(SafeStorage.getItem('alcantara_bank_debt_plan'), defaultDebtPlanState)));
+    const [debtPlanData, setDebtPlanData] = useState(() => normalizeDebtPlanState(safeJsonParse(SafeStorage.getItem('mybank_debt_plan'), defaultDebtPlanState)));
     const [editingDebtItem, setEditingDebtItem] = useState(null);
     const [debtItemForm, setDebtItemForm] = useState({ section: 'currentMonthCritical', id: null, label: '', value: '', due: '', type: '', status: '' });
     useEffect(() => {
-        const quickTab = localStorage.getItem('alcantara_bank_quick_tab');
+        const quickTab = localStorage.getItem('mybank_quick_tab');
         if (quickTab) {
             setTab(quickTab === 'storage' ? 'dashboard' : quickTab);
-            localStorage.removeItem('alcantara_bank_quick_tab');
+            localStorage.removeItem('mybank_quick_tab');
         }
     }, [debtPlanData]);
     useEffect(() => {
@@ -2150,7 +874,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
         try {
             setStorageBusy(true);
             const payload = await buildFullAppBackup();
-            downloadJsonFile(`alcantara_backup_total_v14_${new Date().toISOString().slice(0, 10)}.json`, payload);
+            downloadJsonFile(`mybank_backup_total_${new Date().toISOString().slice(0, 10)}.json`, payload);
             showToast('📦 Backup total do app gerado', 'success');
         }
         catch (error) {
@@ -2165,7 +889,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
         try {
             setStorageBusy(true);
             const payload = await buildFullAppBackup();
-            const shared = await shareJsonFile(`alcantara_backup_total_v14_${new Date().toISOString().slice(0, 10)}.json`, payload, 'Salvar backup total do app no Google Drive');
+            const shared = await shareJsonFile(`mybank_backup_total_${new Date().toISOString().slice(0, 10)}.json`, payload, 'Salvar backup total do app no Google Drive');
             showToast(shared ? '☁️ Compartilhe no Google Drive para salvar o backup' : '📦 Download do backup total gerado', shared ? 'success' : 'warning');
         }
         catch (error) {
@@ -2240,7 +964,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
     const getCats = (area, type) => {
         var _a;
         const a = area === 'pessoal' ? 'pessoal' : 'pessoal';
-        return ((_a = CATS[a]) === null || _a === void 0 ? void 0 : _a[type]) || CATS.oficina.entrada;
+        return ((_a = CATS[a]) === null || _a === void 0 ? void 0 : _a[type]) || CATS.pessoal.entrada;
     };
     const AREA_META = {
         pessoal: { label: 'PESSOAL', color: '#6366f1', bg: 'rgba(99,102,241,0.1)', border: 'rgba(99,102,241,0.3)', icon: 'user' },
@@ -2502,13 +1226,13 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
         }
     };
     // ── Persist ────────────────────────────────────────────────────────
-    useEffect(() => { SafeStorage.setItem('alcantara_bank_transactions', JSON.stringify(normalizeBankTransactions(transactions))); }, [transactions]);
-    useEffect(() => { SafeStorage.setItem('alcantara_bank_fixed', JSON.stringify(normalizeFixedBills(fixedBills))); }, [fixedBills]);
-    useEffect(() => { SafeStorage.setItem('alcantara_bank_budgets', JSON.stringify(normalizeBudgets(budgets))); }, [budgets]);
-    useEffect(() => { SafeStorage.setItem('alcantara_bank_withdrawal_limit', JSON.stringify(Number(withdrawalLimit) > 0 ? Number(withdrawalLimit) : 800)); }, [withdrawalLimit]);
-    useEffect(() => { SafeStorage.setItem('alcantara_bank_cards', JSON.stringify(normalizeCards(cards))); }, [cards]);
-    useEffect(() => { SafeStorage.setItem('alcantara_bank_card_entries', JSON.stringify(normalizeCardEntries(cardEntries))); }, [cardEntries]);
-    useEffect(() => { SafeStorage.setItem('alcantara_bank_debt_plan', JSON.stringify(normalizeDebtPlanState(debtPlanData))); }, [debtPlanData]);
+    useEffect(() => { SafeStorage.setItem('mybank_transactions', JSON.stringify(normalizeBankTransactions(transactions))); }, [transactions]);
+    useEffect(() => { SafeStorage.setItem('mybank_fixed', JSON.stringify(normalizeFixedBills(fixedBills))); }, [fixedBills]);
+    useEffect(() => { SafeStorage.setItem('mybank_budgets', JSON.stringify(normalizeBudgets(budgets))); }, [budgets]);
+    useEffect(() => { SafeStorage.setItem('mybank_withdrawal_limit', JSON.stringify(Number(withdrawalLimit) > 0 ? Number(withdrawalLimit) : 800)); }, [withdrawalLimit]);
+    useEffect(() => { SafeStorage.setItem('mybank_cards', JSON.stringify(normalizeCards(cards))); }, [cards]);
+    useEffect(() => { SafeStorage.setItem('mybank_card_entries', JSON.stringify(normalizeCardEntries(cardEntries))); }, [cardEntries]);
+    useEffect(() => { SafeStorage.setItem('mybank_debt_plan', JSON.stringify(normalizeDebtPlanState(debtPlanData))); }, [debtPlanData]);
     // ── Icon refresh ───────────────────────────────────────────────────
     // No Bank não podemos reexecutar lucide.createIcons(), porque o Lucide
     // substitui nós do DOM fora do ciclo do React e isso derruba a tela
@@ -2559,9 +1283,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
         }
         return [...set].sort((a, b) => b.localeCompare(a));
     }, [transactions, fixedBills, cardEntries, cards, currentYM]);
-    
-
-// ── Summary (all time) ─────────────────────────────────────────────
+    // ── Summary (all time) ─────────────────────────────────────────────
     const totalSummary = useMemo(() => {
         const p = { i: 0, e: 0 };
         const w = { i: 0, e: 0 };
@@ -2589,8 +1311,6 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
             wPaidIncome: wPaid.i, wPaidExpense: wPaid.e,
             personalViaWorkshop, total: (p.i - p.e) + (w.i - w.e) };
     }, [transactions]);
-
-
     // ── Monthly filtered summary ───────────────────────────────────────
     const monthlySummary = useMemo(() => {
         const filtered = transactions.filter(t => t.date && t.date.slice(0, 7) === selectedMonth);
@@ -2672,7 +1392,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
         const totalBudget = Number(budgets.personal || 0) + Number(budgets.workshop || 0);
         const usagePct = totalBudget > 0 ? (currentMonthExpenses / totalBudget) : 0;
         if (workshopNet < 0 || workshopPersonalDrain > Math.max(300, currentMonthIncome * 0.25)) {
-            return { label: 'PRESSÃO MÁXIMA', color: '#ef4444', bg: 'rgba(239,68,68,0.10)', border: 'rgba(239,68,68,0.30)', hint: 'Reduza retiradas e corte saídas da oficina imediatamente.' };
+            return { label: 'PRESSÃO MÁXIMA', color: '#ef4444', bg: 'rgba(239,68,68,0.10)', border: 'rgba(239,68,68,0.30)', hint: 'Reduza retiradas e corte saídas imediatamente.' };
         }
         if (usagePct >= 1 || currentMonthExpenses > currentMonthIncome) {
             return { label: 'RISCO ALTO', color: '#f97316', bg: 'rgba(249,115,22,0.10)', border: 'rgba(249,115,22,0.30)', hint: 'Suas saídas do mês já passaram da zona segura.' };
@@ -2811,16 +1531,16 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
         const ratio = limit > 0 ? spent / limit : 0;
         let status = 'CONTROLADA';
         let tone = '#22c55e';
-        let hint = 'Retirada pessoal da oficina dentro do limite seguro.';
+        let hint = 'Retirada pessoal dentro do limite seguro.';
         if (ratio >= 1) {
             status = 'ESTOUROU';
             tone = '#ef4444';
-            hint = 'A retirada pessoal da oficina passou do limite mensal.';
+            hint = 'A retirada pessoal passou do limite mensal.';
         }
         else if (ratio >= 0.75) {
             status = 'ATENÇÃO';
             tone = '#f59e0b';
-            hint = 'Você está perto do limite de retirada pessoal da oficina.';
+            hint = 'Você está perto do limite de retirada pessoal.';
         }
         return { spent, limit, ratio, status, tone, hint, remaining: limit - spent };
     }, [monthlyWorkshopPersonalOut, withdrawalLimit]);
@@ -3316,7 +2036,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                 return {
                     id: `card_entry_${timestamp}_rec_${index}_${Math.random().toString(36).slice(2, 8)}`,
                     cardId: selectedCardId,
-                    area: form.area === 'oficina' ? 'oficina' : 'pessoal',
+                    area: 'pessoal',
                     category: form.category,
                     description: form.description.trim(),
                     value: totalValue,
@@ -3346,7 +2066,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
             return {
                 id: `card_entry_${timestamp}_${index}_${Math.random().toString(36).slice(2, 8)}`,
                 cardId: selectedCardId,
-                area: form.area === 'oficina' ? 'oficina' : 'pessoal',
+                area: 'pessoal',
                 category: form.category,
                 description: form.description.trim(),
                 value: installmentValue,
@@ -3547,7 +2267,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
         return selectedCardEntriesForMonth.reduce((acc, entry) => {
             const value = Number(entry.value || 0);
             acc.total += value;
-            if (entry.area === 'oficina')
+            if (false)
                 acc.oficina += value;
             else
                 acc.pessoal += value;
@@ -3555,13 +2275,12 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
         }, { total: 0, pessoal: 0, oficina: 0 });
     }, [selectedCardEntriesForMonth]);
     const fixedBillsForSelectedMonth = useMemo(() => fixedBills
-        .filter(b => (b.area || 'pessoal') === 'pessoal')
         .filter(b => b.active !== false && compareYM(selectedMonth, getBillStartMonth(b)) >= 0)
         .sort((a, b) => parseInt(a.day, 10) - parseInt(b.day, 10)), [fixedBills, selectedMonth]);
     const fixedBillsSelectedSummary = useMemo(() => fixedBillsForSelectedMonth.reduce((acc, b) => {
         const value = Number(b.value || 0);
         acc.total += value;
-        if ((b.area || 'oficina') === 'pessoal')
+        if ((b.area || 'pessoal') === 'pessoal')
             acc.pessoal += value;
         else
             acc.oficina += value;
@@ -3626,7 +2345,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
             const totals = entries.reduce((acc, entry) => {
                 const value = Number(entry.value || 0);
                 acc.total += value;
-                if (entry.area === 'oficina')
+                if (false)
                     acc.oficina += value;
                 else
                     acc.pessoal += value;
@@ -3739,7 +2458,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                 ['Receitas', moneyPdf(monthlySummary.totalIncome), [34, 197, 94]],
                 ['Despesas', moneyPdf(monthlySummary.totalExpense), [239, 68, 68]],
                 ['Resultado Pessoal', moneyPdf(monthlySummary.pSaved), monthlySummary.pSaved >= 0 ? [99, 102, 241] : [239, 68, 68]],
-                ['Resultado Oficina', moneyPdf(monthlySummary.wProfit), monthlySummary.wProfit >= 0 ? [212, 175, 55] : [239, 68, 68]],
+                ['Resultado', moneyPdf(monthlySummary.wProfit), monthlySummary.wProfit >= 0 ? [212, 175, 55] : [239, 68, 68]],
             ];
             infoBoxes.forEach((item, idx) => {
                 const x = startX + idx * (boxW + gap);
@@ -3766,7 +2485,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
             doc.setTextColor(225, 225, 225);
             const coverLines = [
                 '• Resumo executivo do mês',
-                '• Demonstrativo consolidado pessoal e oficina',
+                '• Demonstrativo financeiro pessoal',
                 '• Movimentações detalhadas de receitas e despesas',
                 '• Rateio por categoria',
                 '• Contas fixas e situação mensal',
@@ -3881,11 +2600,11 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
         addHeader(true);
         sectionTitle('RESUMO EXECUTIVO', 'Visão consolidada do mês');
         const cardWidth = (contentWidth - 8) / 2;
-        summaryCard(marginLeft, y, cardWidth, 26, 'Receitas totais', moneyPdf(monthlySummary.totalIncome), 'Pessoal + oficina', [22, 163, 74]);
+        summaryCard(marginLeft, y, cardWidth, 26, 'Receitas totais', moneyPdf(monthlySummary.totalIncome), 'Financeiro pessoal', [22, 163, 74]);
         summaryCard(marginLeft + cardWidth + 8, y, cardWidth, 26, 'Despesas totais', moneyPdf(monthlySummary.totalExpense), 'Saídas do mês', [220, 38, 38]);
         y += 30;
         summaryCard(marginLeft, y, cardWidth, 26, 'Resultado pessoal', moneyPdf(monthlySummary.pSaved), `Entradas: ${moneyPdf(monthlySummary.p.i)} | Saídas: ${moneyPdf(monthlySummary.p.e)}`, monthlySummary.pSaved >= 0 ? [79, 70, 229] : [220, 38, 38]);
-        summaryCard(marginLeft + cardWidth + 8, y, cardWidth, 26, 'Resultado oficina', moneyPdf(monthlySummary.wProfit), `Receitas: ${moneyPdf(monthlySummary.w.i)} | Despesas: ${moneyPdf(monthlySummary.w.e)}`, monthlySummary.wProfit >= 0 ? [180, 140, 40] : [220, 38, 38]);
+        summaryCard(marginLeft + cardWidth + 8, y, cardWidth, 26, 'Resultado', moneyPdf(monthlySummary.wProfit), `Receitas: ${moneyPdf(monthlySummary.w.i)} | Despesas: ${moneyPdf(monthlySummary.w.e)}`, monthlySummary.wProfit >= 0 ? [180, 140, 40] : [220, 38, 38]);
         y += 34;
         ensureSpace(16);
         doc.setFont('helvetica', 'normal');
@@ -3923,7 +2642,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
             item.description || item.obs || '-',
             moneyPdf(item.value)
         ]), { emptyMessage: 'Nenhum lançamento pessoal neste mês.' });
-        sectionTitle('MOVIMENTAÇÕES DA OFICINA', `${workshopTransactions.length} lançamento(s)`);
+        sectionTitle('MOVIMENTAÇÕES', `${workshopTransactions.length} lançamento(s)`);
         drawTable([
             { label: 'Data', width: 120 },
             { label: 'Tipo', width: 110 },
@@ -3938,17 +2657,17 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
             item.description || item.obs || '-',
             item.syncSource === 'office' ? 'OS paga' : (item.syncSource === 'fixed_bill' ? 'Conta fixa' : 'Manual'),
             moneyPdf(item.value)
-        ]), { emptyMessage: 'Nenhum lançamento da oficina neste mês.' });
+        ]), { emptyMessage: 'Nenhum lançamento neste mês.' });
         sectionTitle('DESPESAS PESSOAIS POR CATEGORIA', 'Rateio do mês');
         drawTable([
             { label: 'Categoria', width: 700 },
             { label: 'Valor', width: 300, align: 'right' }
         ], buildCategoryRows(monthlySummary.catExpP), { emptyMessage: 'Sem despesas pessoais categorizadas.' });
-        sectionTitle('DESPESAS DA OFICINA POR CATEGORIA', 'Rateio do mês');
+        sectionTitle('DESPESAS POR CATEGORIA', 'Rateio do mês');
         drawTable([
             { label: 'Categoria', width: 700 },
             { label: 'Valor', width: 300, align: 'right' }
-        ], buildCategoryRows(monthlySummary.catExpW), { emptyMessage: 'Sem despesas da oficina categorizadas.' });
+        ], buildCategoryRows(monthlySummary.catExpW), { emptyMessage: 'Sem despesas categorizadas.' });
         sectionTitle('CONTAS FIXAS DO MÊS', `${fixedBillsForMonth.length} conta(s)`);
         drawTable([
             { label: 'Conta', width: 320 },
@@ -3958,7 +2677,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
             { label: 'Valor', width: 250, align: 'right' }
         ], fixedBillsForMonth.map(bill => [
             bill.name || '-',
-            bill.area === 'pessoal' ? 'Pessoal' : 'Oficina',
+            'Pessoal',
             bill.dueDate ? bill.dueDate.toLocaleDateString('pt-BR') : '-',
             bill.paid ? 'Pago' : 'Aberto',
             moneyPdf(bill.value)
@@ -3991,7 +2710,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                     { label: 'Valor', width: 210, align: 'right' }
                 ], card.entries.map(entry => [
                     formatDateBR(entry.date),
-                    entry.area === 'oficina' ? 'Oficina' : 'Pessoal',
+                    'Pessoal',
                     entry.category || '-',
                     `${entry.description || entry.obs || '-'}${entry.isInstallment ? ` (${entry.installmentIndex}/${entry.installmentCount})` : ''}`,
                     moneyPdf(entry.value)
@@ -4005,7 +2724,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
     };
     // ── UI helpers ─────────────────────────────────────────────────────
     const AreaBadge = ({ area, size = 'sm' }) => {
-        const m = AREA_META[area] || AREA_META.oficina;
+        const m = AREA_META.pessoal;
         const sz = size === 'xs' ? 'text-[8px] px-1.5 py-0.5' : 'text-[9px] px-2 py-0.5';
         return React.createElement("span", { className: `${sz} rounded-full font-bold border`, style: { color: m.color, background: m.bg, borderColor: m.border } }, m.label);
     };
@@ -4018,7 +2737,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
         return (React.createElement("div", { style: { height, borderRadius: height, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' } },
             React.createElement("div", { style: { height: '100%', width: `${p}%`, background: c, borderRadius: height, transition: 'width .5s ease-out' } })));
     };
-    const MonthNav = () => (React.createElement("div", { className: "month-nav-fix flex items-center gap-2 mb-4" },
+    const MonthNav = () => (React.createElement("div", { className: "flex items-center gap-2 mb-4" },
         React.createElement("button", { onClick: () => { const i = availableMonths.indexOf(selectedMonth); if (i < availableMonths.length - 1)
                 setSelectedMonth(availableMonths[i + 1]); }, className: "btn-icon text-gray-400 bg-white/5 rounded-xl w-9 h-9", disabled: availableMonths.indexOf(selectedMonth) === availableMonths.length - 1 },
             React.createElement(BankUiIcon, { name: "chevron-left", size: 16, color: "#9ca3af" })),
@@ -4072,7 +2791,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                 React.createElement("div", { className: "flex items-center gap-2 mb-3" },
                     React.createElement("div", { className: "aa-icon-badge w-7 h-7 rounded-full flex items-center justify-center" },
                         React.createElement(BankUiIcon, { name: "wrench", size: 14, color: "#d4af37" })),
-                    React.createElement("span", { className: "text-[9px] font-usarmy" }, "OFICINA")),
+                    React.createElement("span", { className: "text-[9px] font-usarmy" }, "PESSOAL")),
                 React.createElement("p", { className: "font-usarmy text-base mb-1" }, money(totalSummary.wBalance)),
                 React.createElement("div", { className: "flex justify-between text-[8px] font-mono text-gray-500" },
                     React.createElement("span", { className: "text-green-400" },
@@ -4096,39 +2815,49 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
             label)))),
         tab === 'dashboard' && (React.createElement("div", { className: "space-y-4 animate-fadeIn" },
             React.createElement(MonthNav, null),
-            React.createElement("div", { className: "grid grid-cols-1 gap-3" },
+            React.createElement("div", { className: "grid grid-cols-2 gap-3" },
                 React.createElement("div", { className: "os-card p-4 rounded-xl" },
                     React.createElement("p", { className: "text-[8px] text-gray-500 font-mono mb-1" }, "RECEITA DO M\u00CAS"),
                     React.createElement("p", { className: "font-usarmy text-green-400 text-sm" }, money(monthlySummary.totalIncome)),
                     React.createElement("div", { className: "mt-2 text-[9px] text-gray-600 space-y-0.5" },
                         React.createElement("div", { className: "flex justify-between" },
                             React.createElement("span", { style: { color: '#818cf8' } }, "Pessoal"),
-                            React.createElement("span", null, money(monthlySummary.p.i))))),
-                        
-
-
-   React.createElement("div", { className: "os-card p-4 rounded-xl" },
+                            React.createElement("span", null, money(monthlySummary.p.i))),
+                        React.createElement("div", { className: "flex justify-between" },
+                            null,
+                            React.createElement("span", null, money(monthlySummary.w.i))))),
+                React.createElement("div", { className: "os-card p-4 rounded-xl" },
                     React.createElement("p", { className: "text-[8px] text-gray-500 font-mono mb-1" }, "DESPESAS DO M\u00CAS"),
                     React.createElement("p", { className: "font-usarmy text-red-400 text-sm" }, money(monthlySummary.totalExpense)),
                     React.createElement("div", { className: "mt-2 text-[9px] text-gray-600 space-y-0.5" },
                         React.createElement("div", { className: "flex justify-between" },
                             React.createElement("span", { style: { color: '#818cf8' } }, "Pessoal"),
-                            React.createElement("span", null, money(monthlySummary.p.e))))),
-                        
-
-
-      React.createElement("div", { className: "os-card p-9 rounded-xl" },
+                            React.createElement("span", null, money(monthlySummary.p.e))),
+                        React.createElement("div", { className: "flex justify-between" },
+                            null,
+                            React.createElement("span", null, money(monthlySummary.w.e))))),
+                React.createElement("div", { className: "os-card p-4 rounded-xl" },
                     React.createElement("p", { className: "text-[8px] text-gray-500 font-mono mb-1" }, "POUPAN\u00C7A PESSOAL"),
                     React.createElement("p", { className: `font-usarmy text-sm ${monthlySummary.pSaved >= 0 ? 'text-green-400' : 'text-red-400'}` }, money(monthlySummary.pSaved)),
                     React.createElement("div", { className: "mt-2" },
                         React.createElement(ProgressBar, { value: monthlySummary.p.e, total: budgets.personal, color: "#6366f1" }),
                         React.createElement("p", { className: "text-[8px] text-gray-600 mt-1" },
                             pct(monthlySummary.p.e, budgets.personal),
+                            "% do or\u00E7amento"))),
+                React.createElement("div", { className: "os-card p-4 rounded-xl" },
+                    React.createElement("p", { className: "text-[8px] text-gray-500 font-mono mb-1" }, "LUCRO DA OFICINA"),
+                    React.createElement("p", { className: `font-usarmy text-sm ${monthlySummary.wProfit >= 0 ? 'text-[#d4af37]' : 'text-red-400'}` }, money(monthlySummary.wProfit)),
+                    React.createElement("div", { className: "mt-2" },
+                        React.createElement(ProgressBar, { value: monthlySummary.w.e, total: budgets.workshop, color: "#d4af37" }),
+                        React.createElement("p", { className: "text-[8px] text-green-400 mt-1" },
+                            "Lucro real OS: ",
+                            money(monthlySummary.workshopRealProfit),
+                            " \u2022 ",
+                            (monthlySummary.workshopRealMargin || 0).toFixed(1),
+                            "%"),
+                        React.createElement("p", { className: "text-[8px] text-gray-600 mt-1" },
+                            pct(monthlySummary.w.e, budgets.workshop),
                             "% do or\u00E7amento")))))),
-                
-
-
-
         tab === 'lancamentos' && (React.createElement("div", { className: "space-y-4 animate-fadeIn" },
             React.createElement("div", { className: "os-card p-4 rounded-xl" },
                 React.createElement("p", { className: "font-usarmy text-[#d4af37] text-xs mb-4" }, editingId ? '✏️ EDITAR LANÇAMENTO' : '➕ NOVO LANÇAMENTO'),
@@ -4169,7 +2898,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                     React.createElement("select", { value: filterArea, onChange: e => setFilterArea(e.target.value), className: "p-2 rounded-xl text-xs" },
                         React.createElement("option", { value: "todos" }, "Todas as \u00E1reas"),
                         React.createElement("option", { value: "pessoal" }, "Pessoal"),
-                        React.createElement("option", { value: "oficina" }, "Oficina")),
+                        null),
                     React.createElement("select", { value: filterType, onChange: e => setFilterType(e.target.value), className: "p-2 rounded-xl text-xs" },
                         React.createElement("option", { value: "todos" }, "Entradas e sa\u00EDdas"),
                         React.createElement("option", { value: "entrada" }, "Entradas"),
@@ -4214,7 +2943,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                     const catIcon = CAT_ICONS[t.category] || 'circle-dot';
                     const displayDescription = String(t.description || '')
                         .replace(/^Sinal\s+OS\s+(#?\d+)/i, '#$1')
-                        .replace(/^\s+OS\s+(#?\d+)/i, '#$1')
+                        .replace(/^Saldo\s+OS\s+(#?\d+)/i, '#$1')
                         .replace(/^OS\s+(#?\d+)/i, '#$1')
                         .replace(/^##/, '#');
                     return (React.createElement("div", { key: t.id, className: "os-card p-3 rounded-xl border border-white/5" },
@@ -4287,7 +3016,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                     React.createElement("p", { className: "text-[9px] text-gray-500 font-mono mb-1" }, "\u00C1REA"),
                     React.createElement("select", { value: billForm.area, onChange: e => setBillForm(p => ({ ...p, area: e.target.value })), className: "w-full p-3 rounded-xl text-sm" },
                         React.createElement("option", { value: "pessoal" }, "Pessoal"),
-                        React.createElement("option", { value: "oficina" }, "Oficina"))),
+                        null)),
                 React.createElement("div", { className: "grid grid-cols-2 gap-3" },
                     React.createElement("button", { onClick: saveBill, className: "gold-gradient p-3 rounded-xl font-usarmy text-xs" }, editingBillId ? 'ATUALIZAR' : 'SALVAR'),
                     React.createElement("button", { onClick: () => { setEditingBillId(null); setBillForm({ name: '', value: '', date: isoToday(), area: 'pessoal', active: true }); setShowBillForm(false); }, className: "p-3 rounded-xl border border-white/10 text-gray-400 font-usarmy text-xs" }, "CANCELAR")))),
@@ -4305,7 +3034,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
             React.createElement("div", { className: "space-y-2" },
                 fixedBillsForSelectedMonth.length === 0 && (React.createElement("div", { className: "os-card p-10 rounded-xl text-center text-gray-600 font-usarmy text-xs" }, "NENHUMA CONTA FIXA NESTE M\u00CAS")),
                 fixedBillsForSelectedMonth.map(b => {
-                    const meta = AREA_META[b.area || 'pessoal'];
+                    const meta = AREA_META[b.area || 'oficina'];
                     const status = getBillMonthStatus(b, selectedMonth);
                     const { paid, urgent, overdue, waiting, daysUntil, dueDate, started } = status;
                     const badgeBorder = paid
@@ -4326,7 +3055,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                                 React.createElement("div", null,
                                     React.createElement("p", { className: "text-sm font-bold text-white" }, b.name),
                                     React.createElement("div", { className: "flex items-center gap-2 mt-0.5 flex-wrap" },
-                                        React.createElement(AreaBadge, { area: b.area || 'pessoal', size: "xs" }),
+                                        React.createElement(AreaBadge, { area: b.area || 'oficina', size: "xs" }),
                                         React.createElement("span", { className: "text-[8px] px-1.5 py-0.5 rounded-full bg-white/5 text-gray-400 border border-white/10" }, dueDate ? `VENC. ${String(dueDate.getDate()).padStart(2, '0')}` : `INÍCIO ${String(b.day).padStart(2, '0')}`),
                                         paid && (React.createElement("span", { className: "text-[8px] font-bold px-1.5 py-0.5 rounded-full border text-emerald-400 bg-emerald-500/10 border-emerald-500/30" }, "PAGA")),
                                         !paid && !started && (React.createElement("span", { className: "text-[8px] font-bold px-1.5 py-0.5 rounded-full border text-blue-400 bg-blue-500/10 border-blue-500/30" }, "AGUARDANDO IN\u00CDCIO")),
@@ -4616,9 +3345,25 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                                 React.createElement("span", { className: "text-red-400" }, money(stats.pessoal.saida))),
                             React.createElement("div", { className: "flex justify-between text-white pt-1 border-t border-white/10" },
                                 React.createElement("span", null, "Saldo"),
-                                React.createElement("span", null, money(stats.pessoal.saldo))))))))),
+                                React.createElement("span", null, money(stats.pessoal.saldo))))),
                     
-           
+           React.createElement("div", { className: "rounded-xl p-3", style: { background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.16)' } },
+    React.createElement("p", { className: "text-[8px] font-usarmy mb-2", style: { color: '#d4af37' } }, "OFICINA"),
+                        React.createElement("div", { className: "space-y-1 text-[10px]" },
+                            React.createElement("div", { className: "flex justify-between text-gray-400" },
+                                React.createElement("span", null, "Entradas"),
+                                React.createElement("span", { className: "text-green-400" }, money(stats.oficina.entrada))),
+                            React.createElement("div", { className: "flex justify-between text-gray-400" },
+                                React.createElement("span", null, "Sa\u00EDdas"),
+                                React.createElement("span", { className: "text-red-400" }, money(stats.oficina.saida))),
+                            React.createElement("div", { className: "flex justify-between text-white pt-1 border-t border-white/10" },
+                                React.createElement("span", null, "Saldo"),
+                                React.createElement("span", null, money(stats.oficina.saldo))),
+                            React.createElement("div", { className: "flex justify-between text-gray-400" },
+                                React.createElement("span", null, "Pessoal na oficina"),
+                                React.createElement("span", { style: { color: '#a855f7' } }, money(stats.oficina.pessoalNaOficina)))))))))),
+                    React.createElement("div", { className: "rounded-xl p-4", style: { background: tacticalPressure.bg, border: `1px solid ${tacticalPressure.border}` } },
+
 
                React.createElement("p", { className: "text-[9px] font-usarmy", style: { color: tacticalPressure.color } }, "AN\u00C1LISE AUTOM\u00C1TICA V14"),
                 React.createElement("p", { className: "text-sm font-bold text-white mt-1" }, tacticalPressure.label),
@@ -4691,12 +3436,9 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                     React.createElement("button", { onClick: () => removeTransaction(confirmDelete), className: "p-3 rounded-xl bg-red-500/20 border border-red-500/30 text-red-400 font-usarmy text-xs" }, "EXCLUIR")))))));
 };
 const App = () => {
-    var _a;
-    const db = useDb ? useDb() : { state: { orders: [] } };
-    const orders = Array.isArray((_a = db === null || db === void 0 ? void 0 : db.state) === null || _a === void 0 ? void 0 : _a.orders) ? db.state.orders : [];
     return (React.createElement("div", { className: "min-h-screen pb-24 bg-[#050505]" },
         React.createElement("main", { role: "main", className: "p-4 max-w-lg mx-auto" },
-            React.createElement(AlcantaraBankIntegrated, { orders: orders, onBack: () => { }, onOpenOrder: () => { } }))));
+            React.createElement(MyBankIntegrated, { orders: [], onBack: () => { }, onOpenOrder: () => { } }))));
 };
 SafeStorage.ready.finally(() => {
     const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -4704,13 +3446,12 @@ SafeStorage.ready.finally(() => {
         React.createElement(App, null)));
 });
 
-</script>
 
-    <script>
+
         // Service Worker para PWA
         if ('serviceWorker' in navigator) {
             const swCode = `
-                const CACHE_NAME = 'alcantara-v19-logo-retirada-pdf';
+                const CACHE_NAME = 'mybank-v2';
                 const urlsToCache = [
                     './',
                     'https://cdn.tailwindcss.com',
@@ -4787,11 +3528,8 @@ SafeStorage.ready.finally(() => {
                 }
             }, 500);
         });
-    </script>
+    
 
-
-<!-- PATCH ALCANTARA: recarrega ícones Lucide após navegação interna da Tech -->
-<script>
 (function(){
     if (window.__alcantaraLucideFixInstalled) return;
     window.__alcantaraLucideFixInstalled = true;
@@ -4837,11 +3575,8 @@ SafeStorage.ready.finally(() => {
         }
     }, true);
 })();
-</script>
 
 
-
-<script id="mybank-senior-ui-runtime">
 (function(){
   function cleanVisibleText(root){
     if(!root) return;
@@ -4878,10 +3613,8 @@ SafeStorage.ready.finally(() => {
   setTimeout(polish,500);
   setTimeout(polish,1500);
 })();
-</script>
 
 
-<script id="mybank-lancar-migrar-pessoal-real">
 (function(){
   function migrateBankAreas(){
     try{
@@ -4906,10 +3639,8 @@ SafeStorage.ready.finally(() => {
   document.addEventListener('DOMContentLoaded', migrateBankAreas);
   setTimeout(migrateBankAreas, 500);
 })();
-</script>
 
 
-<script id="mybank-splash-screen-js">
 (function(){
   function replaceTopLogo(){
     try{
@@ -4964,7 +3695,14 @@ SafeStorage.ready.finally(() => {
     },2500);
   });
 })();
-</script>
 
-</body>
-</html>
+
+// My Bank pessoal: proteção final contra dados/controles antigos de oficina.
+window.addEventListener('mybank-storage-ready', function(){
+  try{
+    const tx = JSON.parse(SafeStorage.getItem('mybank_transactions') || '[]');
+    if(Array.isArray(tx)){ SafeStorage.setItem('mybank_transactions', JSON.stringify(tx.map(t => ({...t, area:'pessoal'})))); }
+    const bills = JSON.parse(SafeStorage.getItem('mybank_fixed') || '[]');
+    if(Array.isArray(bills)){ SafeStorage.setItem('mybank_fixed', JSON.stringify(bills.map(b => ({...b, area:'pessoal'})))); }
+  }catch(e){}
+});
