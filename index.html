@@ -1429,12 +1429,120 @@ select option[value="oficina"]{display:none!important;}
 
 
 
+<style id="mybank-fixas-correção-definitiva">
+/* Correção definitiva da aba FIXAS — sem alterar cálculos, dados nem funções */
 
+/* Cards sem preenchimento/degradê: saldo, cards comuns e contas urgentes */
+.wallet-card,
+.wallet-personal,
+.os-card,
+.urgent-bills-wrapper,
+.dashboard-premium-card,
+.metric-highlight,
+.breakdown-item{
+    background: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+}
+.wallet-card::before,
+.wallet-card::after,
+.wallet-personal::before,
+.wallet-personal::after,
+.os-card::before,
+.os-card::after,
+.urgent-bills-wrapper::before,
+.urgent-bills-wrapper::after{
+    display: none !important;
+    content: none !important;
+    background: transparent !important;
+    background-image: none !important;
+}
 
+/* Setas ao lado do mês: somente ícone, sem card, sem borda, sem fundo */
+.month-nav-fix{
+    display: grid !important;
+    grid-template-columns: 40px minmax(0,1fr) 40px !important;
+    gap: 10px !important;
+    align-items: center !important;
+    background: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    border: 0 !important;
+}
+.month-nav-fix button,
+#root .month-nav-fix button,
+.month-arrow-only,
+#root button.month-arrow-only{
+    all: unset !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 48px !important;
+    min-width: 40px !important;
+    min-height: 48px !important;
+    max-width: 40px !important;
+    max-height: 48px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    transform: none !important;
+    filter: none !important;
+    animation: none !important;
+    transition: none !important;
+    cursor: pointer !important;
+}
+.month-nav-fix button:disabled,
+#root button.month-arrow-only:disabled{
+    opacity: .35 !important;
+    cursor: default !important;
+}
+.month-nav-fix button svg,
+#root button.month-arrow-only svg{
+    width: 24px !important;
+    height: 24px !important;
+    color: #d4af37 !important;
+    stroke: #d4af37 !important;
+    fill: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+.month-nav-fix select{
+    background: #050505 !important;
+    background-image: none !important;
+    color: #d4af37 !important;
+    border: 1.5px solid rgba(212,175,55,.68) !important;
+    box-shadow: none !important;
+}
 
+/* Contas urgentes: remover faixa/preenchimento superior */
+.urgent-bills-wrapper,
+#root .urgent-bills-wrapper{
+    background: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+}
+.urgent-bills-title,
+#root .urgent-bills-title{
+    background: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+.urgent-bills-wrapper [class*="bg-yellow"],
+.urgent-bills-wrapper [class*="bg-amber"],
+.urgent-bills-wrapper [class*="bg-white"]{
+    background: transparent !important;
+    background-image: none !important;
+}
 
-<style id="ajuste-final-icones-sem-card">
-/* Ajuste final: somente ícones nas contas urgentes e lista de contas fixas */
+/* Ícones de ação: urgentes e lista de contas fixas sem card */
 .urgent-check-only,
 .fixa-icon-only,
 #root button.urgent-check-only,
@@ -1443,48 +1551,24 @@ select option[value="oficina"]{display:none!important;}
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    min-height: 26px !important;
+    max-width: 26px !important;
+    max-height: 26px !important;
+    padding: 0 !important;
+    margin: 0 6px !important;
     background: transparent !important;
     background-image: none !important;
-    border: 0 !important;
-    outline: 0 !important;
+    border: none !important;
+    outline: none !important;
     box-shadow: none !important;
     border-radius: 0 !important;
-    padding: 0 !important;
-    margin: 0 7px !important;
-    width: 24px !important;
-    height: 24px !important;
-    min-width: 24px !important;
-    min-height: 24px !important;
-    max-width: 24px !important;
-    max-height: 24px !important;
     transform: none !important;
     filter: none !important;
     animation: none !important;
     transition: none !important;
-    cursor: pointer !important;
-}
-.urgent-check-only:hover,
-.urgent-check-only:active,
-.urgent-check-only:focus,
-.fixa-icon-only:hover,
-.fixa-icon-only:active,
-.fixa-icon-only:focus{
-    all: unset !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 24px !important;
-    height: 24px !important;
-    min-width: 24px !important;
-    min-height: 24px !important;
-    max-width: 24px !important;
-    max-height: 24px !important;
-    padding: 0 !important;
-    margin: 0 7px !important;
-    background: transparent !important;
-    border: 0 !important;
-    outline: 0 !important;
-    box-shadow: none !important;
     cursor: pointer !important;
 }
 .urgent-check-only svg,
@@ -1497,11 +1581,30 @@ select option[value="oficina"]{display:none!important;}
     box-shadow: none !important;
     fill: none !important;
 }
+
+/* Não mexer no botão grande de NOVA CONTA FIXA */
 button.gold-gradient,
 .gold-gradient{
-    background:#d4af37 !important;
-    color:#050505 !important;
-    border:1.5px solid #d4af37 !important;
+    background: #d4af37 !important;
+    background-image: none !important;
+    color: #050505 !important;
+    border: 1.5px solid #d4af37 !important;
+}
+button.gold-gradient *,
+.gold-gradient *{
+    color: #050505 !important;
+    stroke: #050505 !important;
+}
+
+/* Remove animações que estavam causando mudança visual nos botões */
+.bank-nav-card,
+.dashboard-premium-btn,
+.month-arrow-only,
+.urgent-check-only,
+.fixa-icon-only{
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
 }
 </style>
 
@@ -4260,11 +4363,11 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
     };
     const MonthNav = () => (React.createElement("div", { className: "month-nav-fix flex items-center gap-2 mb-4" },
         React.createElement("button", { onClick: () => { const i = availableMonths.indexOf(selectedMonth); if (i < availableMonths.length - 1)
-                setSelectedMonth(availableMonths[i + 1]); }, className: "btn-icon text-gray-400 bg-white/5 rounded-xl w-9 h-9", disabled: availableMonths.indexOf(selectedMonth) === availableMonths.length - 1 },
+                setSelectedMonth(availableMonths[i + 1]); }, className: "month-arrow-only", disabled: availableMonths.indexOf(selectedMonth) === availableMonths.length - 1 },
             React.createElement(BankUiIcon, { name: "chevron-left", size: 16, color: "#9ca3af" })),
         React.createElement("select", { value: selectedMonth, onChange: e => setSelectedMonth(e.target.value), className: "flex-1 p-2 rounded-xl text-center text-xs font-usarmy", style: { background: '#0f0f0f', color: '#d4af37', border: '1px solid rgba(212,175,55,0.2)' } }, availableMonths.map(m => React.createElement("option", { key: m, value: m }, monthLabel(m)))),
         React.createElement("button", { onClick: () => { const i = availableMonths.indexOf(selectedMonth); if (i > 0)
-                setSelectedMonth(availableMonths[i - 1]); }, className: "btn-icon text-gray-400 bg-white/5 rounded-xl w-9 h-9", disabled: availableMonths.indexOf(selectedMonth) === 0 },
+                setSelectedMonth(availableMonths[i - 1]); }, className: "month-arrow-only", disabled: availableMonths.indexOf(selectedMonth) === 0 },
             React.createElement(BankUiIcon, { name: "chevron-right", size: 16, color: "#9ca3af" }))));
     // ── RENDER ─────────────────────────────────────────────────────────
     return (React.createElement("div", { className: "animate-fadeIn pb-6" },
@@ -4498,8 +4601,8 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                         React.createElement("p", { className: "text-[8px] text-gray-500" },
                             "Pendente ",
                             money(fixedBillsSelectedSummary.pending))))),
-            billsAlerts.filter(b => b.urgent || b.overdue).length > 0 && (React.createElement("div", { className: "rounded-xl overflow-hidden", style: { border: '1px solid rgba(234,179,8,0.3)' } },
-                React.createElement("div", { className: "p-2 flex items-center gap-2", style: { background: 'rgba(234,179,8,0.1)' } },
+            billsAlerts.filter(b => b.urgent || b.overdue).length > 0 && (React.createElement("div", { className: "urgent-bills-wrapper rounded-xl overflow-hidden", style: { border: '1px solid rgba(234,179,8,0.3)', background: 'transparent' } },
+                React.createElement("div", { className: "urgent-bills-title p-2 flex items-center gap-2", style: { background: 'transparent' } },
                     React.createElement(BankUiIcon, { name: "shield-alert", size: 16, color: "#facc15" }),
                     React.createElement("span", { className: "font-usarmy text-yellow-400 text-xs" }, "CONTAS URGENTES")),
                 billsAlerts.filter(b => !b.paid && (b.urgent || b.overdue)).map(b => (React.createElement("div", { key: b.id, className: "p-3 border-t border-yellow-500/10 flex items-center justify-between gap-3" },
@@ -4662,9 +4765,9 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                                 React.createElement("div", { className: "text-right flex-shrink-0" },
                                     React.createElement("p", { className: "font-usarmy text-red-400 text-sm" }, money(cardTotal)),
                                     React.createElement("div", { className: "flex gap-1 mt-2 justify-end" },
-                                        React.createElement("button", { onClick: () => editCard(card), className: "fixa-icon-only text-[#d4af37]", "aria-label": "Editar cart\u00E3o" },
+                                        React.createElement("button", { onClick: () => editCard(card), className: "btn-icon text-[#d4af37] w-8 h-8", "aria-label": "Editar cart\u00E3o" },
                                             React.createElement(BankUiIcon, { name: "pencil", size: 14, color: "#d4af37" })),
-                                        React.createElement("button", { onClick: () => setConfirmDeleteCard(card.id), className: "fixa-icon-only text-red-500", "aria-label": "Excluir cart\u00E3o" },
+                                        React.createElement("button", { onClick: () => setConfirmDeleteCard(card.id), className: "btn-icon text-red-500 w-8 h-8", "aria-label": "Excluir cart\u00E3o" },
                                             React.createElement(BankUiIcon, { name: "trash-2", size: 14, color: "#ef4444" })))))));
                     })))),
             selectedCard && (React.createElement(React.Fragment, null,
@@ -4829,9 +4932,9 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                                             "de ",
                                             money(entry.totalPurchaseValue || entry.value)),
                                         React.createElement("div", { className: "flex gap-1 mt-2 justify-end" },
-                                            React.createElement("button", { onClick: () => editCardEntry(entry), className: "fixa-icon-only text-[#d4af37]", "aria-label": "Editar gasto do cart\u00E3o" },
+                                            React.createElement("button", { onClick: () => editCardEntry(entry), className: "btn-icon text-[#d4af37] w-8 h-8", "aria-label": "Editar gasto do cart\u00E3o" },
                                                 React.createElement(BankUiIcon, { name: "pencil", size: 14, color: "#d4af37" })),
-                                            React.createElement("button", { onClick: () => setConfirmDeleteCardEntry(entry.id), className: "fixa-icon-only text-red-500", "aria-label": "Excluir gasto do cart\u00E3o" },
+                                            React.createElement("button", { onClick: () => setConfirmDeleteCardEntry(entry.id), className: "btn-icon text-red-500 w-8 h-8", "aria-label": "Excluir gasto do cart\u00E3o" },
                                                 React.createElement(BankUiIcon, { name: "trash-2", size: 14, color: "#ef4444" })))))));
                         }))))))))),
         tab === 'fechamento' && (React.createElement("div", { className: "space-y-4 animate-fadeIn" },
