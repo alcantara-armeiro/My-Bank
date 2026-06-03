@@ -21,5 +21,12 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+
+    {
+      "src": "icons/logo.png",
+      "sizes": "logo",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
   ]
 }
