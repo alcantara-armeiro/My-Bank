@@ -472,7 +472,7 @@
             50%{transform:scale(1.08);opacity:1;}
         }
         .assistencia-logo-premium{
-            background-image:url('./icons/logo.jpg?v=19');
+            background-image:url('./icons/logo.png?v=19');
             border-radius:9999px;
             border:2px solid rgba(111,143,66,0.38);
         }
@@ -2239,7 +2239,7 @@ const verifyPassword = (input) => {
     }
     return diff === 0;
 };
-const LOGO_URL = "./icons/logo.jpg?v=19";
+const LOGO_URL = "./icons/logo.png?v=19";
 // Logo embutido para PDF: evita falha online por CORS/cache de imagem externa.
 const LOGO_DATA_URL = "";
 const getPdfLogoDataUrl = async () => LOGO_DATA_URL;
@@ -5062,7 +5062,7 @@ SafeStorage.ready.finally(() => {
                     'https://unpkg.com/@babel/standalone/babel.min.js',
                     'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
                     'https://unpkg.com/lucide@latest',
-                    './icons/logo.jpg'
+                    './icons/logo.png'
                 ];
 
                 self.addEventListener('install', event => {
