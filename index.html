@@ -3749,10 +3749,24 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
 const App = () => (React.createElement("div", { className: "min-h-screen pb-24 bg-[#050505]" },
     React.createElement("main", { role: "main", className: "p-4 max-w-lg mx-auto" },
         React.createElement(AlcantaraBankIntegrated, { orders: [], onBack: () => { }, onOpenOrder: () => { } }))));
+function fecharSplashMyBank() {
+    const splash = document.getElementById('splashScreen');
+    if (!splash) return;
+    splash.classList.add('splash-hide');
+    setTimeout(() => {
+        if (splash && splash.parentNode) splash.parentNode.removeChild(splash);
+    }, 800);
+}
+
 SafeStorage.ready.finally(() => {
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(React.createElement(App, null));
+    setTimeout(fecharSplashMyBank, 700);
 });
+
+// Segurança: se qualquer script demorar ou falhar, a tela inicial não fica travada.
+window.addEventListener('load', () => setTimeout(fecharSplashMyBank, 3500));
+setTimeout(fecharSplashMyBank, 6000);
 
 </script>
 

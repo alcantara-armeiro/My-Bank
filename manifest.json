@@ -2,14 +2,9 @@
   "name": "My Bank",
   "short_name": "My Bank",
   "description": "Gestão financeira pessoal",
-  "id": "./index.html",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "display_override": [
-    "standalone",
-    "minimal-ui"
-  ],
   "background_color": "#050505",
   "theme_color": "#050505",
   "orientation": "portrait",

@@ -1,25 +1,13 @@
-const CACHE_NAME = 'mybank-pwa-corrigido-v1';
-const APP_SHELL = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icons/icon-192x192.png',
-  './icons/icon-512x512.png',
-  './icons/logo.png'
-];
+const CACHE_NAME = 'mybank-ajuste-final-v4';
 
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
-  );
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.map(key => key === CACHE_NAME ? null : caches.delete(key))))
+      .then(keys => Promise.all(keys.map(k => k !== CACHE_NAME ? caches.delete(k) : Promise.resolve())))
       .then(() => self.clients.claim())
   );
 });
@@ -27,9 +15,11 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const request = event.request;
 
-  if (request.mode === 'navigate') {
+  if (request.mode === 'navigate' || request.destination === 'document') {
     event.respondWith(
-      fetch(request).catch(() => caches.match('./index.html'))
+      fetch(request).catch(() =>
+        caches.match('./index.html').then(cached => cached || caches.match('index.html'))
+      )
     );
     return;
   }
@@ -38,7 +28,6 @@ self.addEventListener('fetch', event => {
     caches.match(request).then(cached => {
       if (cached) return cached;
       return fetch(request).then(response => {
-        if (!response || response.status !== 200 || response.type === 'opaque') return response;
         const copy = response.clone();
         caches.open(CACHE_NAME).then(cache => cache.put(request, copy)).catch(() => {});
         return response;
