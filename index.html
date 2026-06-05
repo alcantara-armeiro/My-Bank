@@ -1142,6 +1142,18 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
         description: '', value: '', date: new Date().toISOString().slice(0, 10),
         obs: '', isPersonalExpense: false
     };
+    const parseMoneyValue = (rawValue) => {
+        let raw = String(rawValue ?? '').trim();
+        if (!raw) return 0;
+        raw = raw.replace(/\s/g, '').replace(/R\$/gi, '');
+        if (raw.includes(',') && raw.includes('.')) {
+            raw = raw.replace(/\./g, '').replace(',', '.');
+        } else if (raw.includes(',')) {
+            raw = raw.replace(',', '.');
+        }
+        const parsed = Number(raw);
+        return Number.isFinite(parsed) ? Math.round((parsed + Number.EPSILON) * 100) / 100 : 0;
+    };
     const [form, setForm] = useState(emptyForm);
     useEffect(() => {
         setForm(prev => {
@@ -2022,7 +2034,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
     };
     const saveDebtItemEdit = () => {
         const section = debtItemForm.section;
-        const value = parseFloat(debtItemForm.value);
+        const value = parseMoneyValue(debtItemForm.value);
         if (!section || !debtItemForm.label.trim() || !value || value <= 0) {
             showToast('Preencha nome e valor válido da dívida', 'warning');
             return;
@@ -2107,7 +2119,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
     const maxCashFlow = useMemo(() => Math.max(...cashFlowDays.map(d => Math.max(d.in, d.out)), 1), [cashFlowDays]);
     // ── Save transaction ───────────────────────────────────────────────
     const saveTransaction = () => {
-        const value = parseFloat(form.value);
+        const value = parseMoneyValue(form.value);
         const isPE = form.area === 'pessoal' && (form.isPersonalExpense || PERSONAL_EXPENSE_CATS.includes(form.category)) && form.type === 'saida';
         if (!form.description.trim() || !value || value <= 0) {
             showToast('Preencha descrição e valor válido', 'warning');
@@ -2173,7 +2185,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
     };
     // ── Fixed bills ────────────────────────────────────────────────────
     const saveBill = () => {
-        const value = parseFloat(billForm.value);
+        const value = parseMoneyValue(billForm.value);
         const billDate = billForm.date;
         const day = parseInt((billDate || '').slice(8, 10), 10);
         if (!billForm.name.trim() || !value || !billDate || !day || day < 1 || day > 31) {
@@ -2376,7 +2388,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
         return new Date(year, month - 1, Math.min(dueDay, maxDay), 12, 0, 0, 0);
     };
     const buildCardEntriesFromForm = (form, card) => {
-        const totalValue = Math.round((Number(form.totalValue || 0) + Number.EPSILON) * 100) / 100;
+        const totalValue = parseMoneyValue(form.totalValue);
         const purchaseDate = normalizeBankDate(form.date, isoToday());
         const timestamp = Date.now();
         const isRecurring = form.isRecurring === true;
@@ -2444,7 +2456,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
         const name = String(cardForm.name || '').trim();
         const brand = String(cardForm.brand || '').trim();
         const final = String(cardForm.final || '').replace(/\D/g, '').slice(-4);
-        const limit = cardForm.limit === '' ? '' : Number(cardForm.limit || 0);
+        const limit = cardForm.limit === '' ? '' : parseMoneyValue(cardForm.limit);
         const dueDay = cardForm.dueDay === '' ? '' : Math.min(Math.max(parseInt(cardForm.dueDay || 0, 10), 1), 31);
         const closingDay = cardForm.closingDay === '' ? '' : Math.min(Math.max(parseInt(cardForm.closingDay || 0, 10), 1), 31);
         const bestPurchaseDay = cardForm.bestPurchaseDay === '' ? '' : Math.min(Math.max(parseInt(cardForm.bestPurchaseDay || 0, 10), 1), 31);
@@ -2510,7 +2522,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
             showToast('Cartão não encontrado', 'warning');
             return;
         }
-        const totalValue = Number(cardEntryForm.totalValue || 0);
+        const totalValue = parseMoneyValue(cardEntryForm.totalValue);
         const installmentCount = cardEntryForm.isInstallment ? Math.max(parseInt(cardEntryForm.installmentCount || 1, 10) || 1, 2) : 1;
         if (cardEntryForm.isRecurring && cardEntryForm.isInstallment) {
             showToast('Escolha parcelado OU recorrente', 'warning');
@@ -3209,7 +3221,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                         React.createElement("input", { type: "date", value: form.date, onChange: e => setForm(p => ({ ...p, date: e.target.value })), className: "w-full p-3 rounded-xl text-sm" })),
                     React.createElement("div", null,
                         React.createElement("p", { className: "text-[9px] text-gray-500 font-mono mb-1" }, "VALOR (R$)"),
-                        React.createElement("input", { type: "text", inputMode: "decimal", inputMode: "decimal", step: "0.01", min: "0", value: form.value, placeholder: "0,00", onChange: e => setForm(p => ({ ...p, value: e.target.value })), className: "w-full p-3 rounded-xl text-sm" }))),
+                        React.createElement("input", { type: "text", inputMode: "decimal", step: "0.01", min: "0", value: form.value, placeholder: "0,00", onChange: e => setForm(p => ({ ...p, value: e.target.value })), className: "w-full p-3 rounded-xl text-sm" }))),
                 React.createElement("p", { className: "text-[9px] text-gray-500 font-mono mb-1" }, "DESCRI\u00C7\u00C3O"),
                 React.createElement("input", { type: "text", value: form.description, placeholder: "Ex: mercado, gasolina, pe\u00E7a, frete, servi\u00E7o...", onChange: e => setForm(p => ({ ...p, description: e.target.value })), className: "w-full p-3 rounded-xl mb-3 text-sm" }),
                 React.createElement("p", { className: "text-[9px] text-gray-500 font-mono mb-1" }, "OBSERVA\u00C7\u00C3O (opcional)"),
@@ -3338,7 +3350,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                         React.createElement("input", { type: "date", value: billForm.date, onChange: e => setBillForm(p => ({ ...p, date: e.target.value })), className: "w-full p-3 rounded-xl text-sm" })),
                     React.createElement("div", null,
                         React.createElement("p", { className: "text-[9px] text-gray-500 font-mono mb-1" }, "VALOR (R$)"),
-                        React.createElement("input", { type: "text", inputMode: "decimal", inputMode: "decimal", step: "0.01", value: billForm.value, placeholder: "0,00", onChange: e => setBillForm(p => ({ ...p, value: e.target.value })), className: "w-full p-3 rounded-xl text-sm" }))),
+                        React.createElement("input", { type: "text", inputMode: "decimal", step: "0.01", value: billForm.value, placeholder: "0,00", onChange: e => setBillForm(p => ({ ...p, value: e.target.value })), className: "w-full p-3 rounded-xl text-sm" }))),
                 React.createElement("div", { className: "mb-3" },
                     React.createElement("p", { className: "text-[9px] text-gray-500 font-mono mb-1" }, "\u00C1REA"),
                     React.createElement("select", { value: billForm.area, onChange: e => setBillForm(p => ({ ...p, area: e.target.value })), className: "w-full p-3 rounded-xl text-sm" },
@@ -3428,7 +3440,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                     React.createElement("div", { className: "grid grid-cols-2 gap-3 mb-3" },
                         React.createElement("div", null,
                             React.createElement("p", { className: "text-[9px] text-gray-500 font-mono mb-1" }, "LIMITE (opcional)"),
-                            React.createElement("input", { type: "text", inputMode: "decimal", inputMode: "decimal", step: "0.01", value: cardForm.limit, placeholder: "0,00", onChange: e => setCardForm(p => ({ ...p, limit: e.target.value })), className: "w-full p-3 rounded-xl text-sm" })),
+                            React.createElement("input", { type: "text", inputMode: "decimal", step: "0.01", value: cardForm.limit, placeholder: "0,00", onChange: e => setCardForm(p => ({ ...p, limit: e.target.value })), className: "w-full p-3 rounded-xl text-sm" })),
                         React.createElement("div", null,
                             React.createElement("p", { className: "text-[9px] text-gray-500 font-mono mb-1" }, "VENCIMENTO"),
                             React.createElement("input", { type: "text", inputMode: "decimal", min: "1", max: "31", value: cardForm.dueDay, placeholder: "Dia", onChange: e => setCardForm(p => ({ ...p, dueDay: e.target.value.replace(/\D/g, '').slice(0, 2) })), className: "w-full p-3 rounded-xl text-sm" }))),
@@ -3558,7 +3570,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                             React.createElement("input", { type: "date", value: cardEntryForm.date, onChange: e => setCardEntryForm(prev => ({ ...prev, date: e.target.value })), className: "w-full p-3 rounded-xl text-sm" })),
                         React.createElement("div", null,
                             React.createElement("p", { className: "text-[9px] text-gray-500 font-mono mb-1" }, "VALOR TOTAL (R$)"),
-                            React.createElement("input", { type: "text", inputMode: "decimal", inputMode: "decimal", step: "0.01", min: "0", value: cardEntryForm.totalValue, onChange: e => setCardEntryForm(prev => ({ ...prev, totalValue: e.target.value })), className: "w-full p-3 rounded-xl text-sm" }))),
+                            React.createElement("input", { type: "text", inputMode: "decimal", step: "0.01", min: "0", value: cardEntryForm.totalValue, onChange: e => setCardEntryForm(prev => ({ ...prev, totalValue: e.target.value })), className: "w-full p-3 rounded-xl text-sm" }))),
                     React.createElement("p", { className: "text-[9px] text-gray-500 font-mono mb-1" }, "DESCRI\u00C7\u00C3O"),
                     React.createElement("input", { type: "text", value: cardEntryForm.description, placeholder: "Ex: Compra de pe\u00E7a, mercado...", onChange: e => setCardEntryForm(prev => ({ ...prev, description: e.target.value })), className: "w-full p-3 rounded-xl mb-3 text-sm" }),
                     React.createElement("div", { className: "rounded-xl p-3 mb-3", style: { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' } },
@@ -3577,7 +3589,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                                 React.createElement("input", { type: "text", inputMode: "decimal", min: "2", max: "48", value: cardEntryForm.installmentCount, onChange: e => setCardEntryForm(prev => ({ ...prev, installmentCount: e.target.value.replace(/\D/g, '').slice(0, 2) })), className: "w-full p-3 rounded-xl text-sm" })),
                             React.createElement("div", { className: "rounded-xl p-3 flex flex-col justify-center", style: { background: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.12)' } },
                                 React.createElement("p", { className: "text-[9px] text-gray-500 font-mono" }, "VALOR ESTIMADO POR PARCELA"),
-                                React.createElement("p", { className: "font-usarmy text-[#d4af37] text-sm mt-1" }, money(Number(cardEntryForm.totalValue || 0) / Math.max(parseInt(cardEntryForm.installmentCount || 1, 10) || 1, 1))))))),
+                                React.createElement("p", { className: "font-usarmy text-[#d4af37] text-sm mt-1" }, money(parseMoneyValue(cardEntryForm.totalValue) / Math.max(parseInt(cardEntryForm.installmentCount || 1, 10) || 1, 1))))))),
                     React.createElement("div", { className: "os-card p-3 rounded-xl mb-4", style: { border: '1px solid rgba(255,255,255,0.08)' } },
                         React.createElement("div", { className: "flex items-center justify-between gap-3" },
                             React.createElement("div", null,
@@ -3594,7 +3606,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                                 React.createElement("input", { type: "text", inputMode: "decimal", min: "1", max: "120", value: cardEntryForm.recurrenceMonths, onChange: e => setCardEntryForm(prev => ({ ...prev, recurrenceMonths: e.target.value.replace(/\D/g, '').slice(0, 3) })), className: "w-full p-3 rounded-xl text-sm" })),
                             React.createElement("div", { className: "rounded-xl p-3 flex flex-col justify-center", style: { background: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.12)' } },
                                 React.createElement("p", { className: "text-[9px] text-gray-500 font-mono" }, "VALOR MENSAL"),
-                                React.createElement("p", { className: "font-usarmy text-[#d4af37] text-sm mt-1" }, money(Number(cardEntryForm.totalValue || 0))))))),
+                                React.createElement("p", { className: "font-usarmy text-[#d4af37] text-sm mt-1" }, money(parseMoneyValue(cardEntryForm.totalValue))))))),
                     React.createElement("p", { className: "text-[9px] text-gray-500 font-mono mb-1" }, "OBSERVA\u00C7\u00C3O (opcional)"),
                     React.createElement("input", { type: "text", value: cardEntryForm.obs, placeholder: "Detalhes extras...", onChange: e => setCardEntryForm(prev => ({ ...prev, obs: e.target.value })), className: "w-full p-3 rounded-xl mb-4 text-sm" }),
                     React.createElement("div", { className: "grid grid-cols-2 gap-3" },
