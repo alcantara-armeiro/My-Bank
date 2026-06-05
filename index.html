@@ -11,8 +11,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="My Bank">
     <meta name="theme-color" content="#050505">
-    <meta name="application-name" content="My Bank">
-    <meta name="msapplication-TileColor" content="#050505">
     <meta name="background-color" content="#050505">
     <meta name="description" content="My Bank">
     <meta name="robots" content="noindex, nofollow">
@@ -33,8 +31,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16x16.png">
 
     <!-- Manifesto PWA -->
-    <link rel="manifest" href="./manifest.json?v=20260605">
-    <link rel="mask-icon" href="icons/icon-512x512.png" color="#050505">
+    <link rel="manifest" href="./manifest.json">
 
     <!-- Scripts -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -614,7 +611,7 @@ option{background:#050505!important;color:#e5e5e5!important;}
             const cloneValue = (v) => v === undefined ? null : String(v);
             const keysToMirror = [
                 'alcantara_catalog','alcantara_products','alcantara_bank_transactions','alcantara_bank_fixed',
-                'alcantara_bank_budgets','alcantara_bank_cards','alcantara_bank_card_entries','alcantara_bank_reserve','gf_fornecedores','gf_pecas',
+                'alcantara_bank_budgets','alcantara_bank_cards','alcantara_bank_card_entries','gf_fornecedores','gf_pecas',
                 'gf_margem','alcantara_assistencias_registros','alcantara_customer_notes','alcantara_last_bench_os',
                 'alcantara_auth','alcantara_equipment_history','alcantara_tech_maintenances'
             ];
@@ -1118,16 +1115,6 @@ const showToast = (message, type = 'info') => {
 
 
 
-
-const normalizeReserveEntries = (items) => Array.isArray(items) ? items.map(item => ({
-    id: String(item && item.id ? item.id : Date.now() + Math.random()),
-    type: item && item.type === 'retirar' ? 'retirar' : 'guardar',
-    description: String(item && item.description ? item.description : ''),
-    value: Number(item && item.value ? item.value : 0),
-    date: normalizeBankDate(item && item.date ? item.date : isoToday()),
-    obs: String(item && item.obs ? item.obs : '')
-})).filter(item => item.value > 0) : [];
-
 // ========== MY BANK BANK V14 — COMPLETE ==========
 const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
     const BANK_VERSION_LABEL = 'V14.1 PREMIUM';
@@ -1136,9 +1123,6 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
     // ── State ──────────────────────────────────────────────────────────
     const [tab, setTab] = useState(() => localStorage.getItem('alcantara_bank_quick_tab') || 'dashboard');
     const [transactions, setTransactions] = useState(() => normalizeBankTransactions(safeJsonParse(SafeStorage.getItem('alcantara_bank_transactions'), [])));
-    const [reserveEntries, setReserveEntries] = useState(() => normalizeReserveEntries(safeJsonParse(SafeStorage.getItem('alcantara_bank_reserve'), [])));
-    const [reserveForm, setReserveForm] = useState({ type: 'guardar', description: '', value: '', date: isoToday(), obs: '' });
-    const [editingReserveId, setEditingReserveId] = useState(null);
     const [fixedBills, setFixedBills] = useState(() => normalizeFixedBills(safeJsonParse(SafeStorage.getItem('alcantara_bank_fixed'), [])));
     const [budgets, setBudgets] = useState(() => normalizeBudgets(safeJsonParse(SafeStorage.getItem('alcantara_bank_budgets'), { personal: 2500, workshop: 1200 })));
     const [withdrawalLimit, setWithdrawalLimit] = useState(() => {
@@ -1182,6 +1166,17 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
     const [billForm, setBillForm] = useState({ name: '', value: '', date: isoToday(), area: 'pessoal', active: true });
     const [cards, setCards] = useState(() => normalizeCards(safeJsonParse(SafeStorage.getItem('alcantara_bank_cards'), [])));
     const [cardEntries, setCardEntries] = useState(() => normalizeCardEntries(safeJsonParse(SafeStorage.getItem('alcantara_bank_card_entries'), [])));
+    const normalizeReserveEntries = (value) => asArray(value).map((item, index) => ({
+        id: String((item === null || item === void 0 ? void 0 : item.id) || `reserve_${Date.now()}_${index}`),
+        type: (item === null || item === void 0 ? void 0 : item.type) === 'saida' ? 'saida' : 'entrada',
+        value: Number((item === null || item === void 0 ? void 0 : item.value) || 0),
+        date: normalizeBankDate((item === null || item === void 0 ? void 0 : item.date) || isoToday()),
+        description: String((item === null || item === void 0 ? void 0 : item.description) || ((item === null || item === void 0 ? void 0 : item.type) === 'saida' ? 'Retirada da reserva' : 'Guardado na reserva')),
+        txId: String((item === null || item === void 0 ? void 0 : item.txId) || '')
+    })).filter(item => item.value > 0);
+    const [reserveEntries, setReserveEntries] = useState(() => normalizeReserveEntries(safeJsonParse(SafeStorage.getItem('alcantara_bank_reserve'), [])));
+    const [reserveForm, setReserveForm] = useState({ type: 'entrada', value: '', date: isoToday(), description: 'Reserva' });
+    const [editingReserveId, setEditingReserveId] = useState(null);
     const [selectedCardId, setSelectedCardId] = useState(null);
     const defaultDebtPlanState = {
         currentMonthCritical: [
@@ -1603,12 +1598,12 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
     };
     // ── Persist ────────────────────────────────────────────────────────
     useEffect(() => { SafeStorage.setItem('alcantara_bank_transactions', JSON.stringify(normalizeBankTransactions(transactions))); }, [transactions]);
-    useEffect(() => { SafeStorage.setItem('alcantara_bank_reserve', JSON.stringify(normalizeReserveEntries(reserveEntries))); }, [reserveEntries]);
     useEffect(() => { SafeStorage.setItem('alcantara_bank_fixed', JSON.stringify(normalizeFixedBills(fixedBills))); }, [fixedBills]);
     useEffect(() => { SafeStorage.setItem('alcantara_bank_budgets', JSON.stringify(normalizeBudgets(budgets))); }, [budgets]);
     useEffect(() => { SafeStorage.setItem('alcantara_bank_withdrawal_limit', JSON.stringify(Number(withdrawalLimit) > 0 ? Number(withdrawalLimit) : 800)); }, [withdrawalLimit]);
     useEffect(() => { SafeStorage.setItem('alcantara_bank_cards', JSON.stringify(normalizeCards(cards))); }, [cards]);
     useEffect(() => { SafeStorage.setItem('alcantara_bank_card_entries', JSON.stringify(normalizeCardEntries(cardEntries))); }, [cardEntries]);
+    useEffect(() => { SafeStorage.setItem('alcantara_bank_reserve', JSON.stringify(normalizeReserveEntries(reserveEntries))); }, [reserveEntries]);
     useEffect(() => { SafeStorage.setItem('alcantara_bank_debt_plan', JSON.stringify(normalizeDebtPlanState(debtPlanData))); }, [debtPlanData]);
     // ── Icon refresh ───────────────────────────────────────────────────
     // No Bank não podemos reexecutar lucide.createIcons(), porque o Lucide
@@ -1635,6 +1630,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
             set.add(ym); });
         fixedBills.forEach(b => { if (isIsoDate(b === null || b === void 0 ? void 0 : b.date))
             set.add(b.date.slice(0, 7)); });
+        reserveEntries.forEach(r => { const ym = String(normalizeBankDate((r === null || r === void 0 ? void 0 : r.date) || '')).slice(0, 7); if (/^\d{4}-\d{2}$/.test(ym)) set.add(ym); });
         cardEntries.forEach(entry => {
             const ym = /^\d{4}-\d{2}$/.test(String((entry === null || entry === void 0 ? void 0 : entry.invoiceMonth) || ''))
                 ? String(entry.invoiceMonth)
@@ -1659,7 +1655,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
             }
         }
         return [...set].sort((a, b) => b.localeCompare(a));
-    }, [transactions, fixedBills, cardEntries, cards, currentYM]);
+    }, [transactions, fixedBills, cardEntries, reserveEntries, cards, currentYM]);
     
 
 // ── Summary (all time) ─────────────────────────────────────────────
@@ -2134,88 +2130,60 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
         }));
     }, [transactions, selectedMonth]);
     const maxCashFlow = useMemo(() => Math.max(...cashFlowDays.map(d => Math.max(d.in, d.out)), 1), [cashFlowDays]);
-
-    const reserveBalance = useMemo(() => {
-        return reserveEntries.reduce((sum, item) => sum + (item.type === 'guardar' ? Number(item.value || 0) : -Number(item.value || 0)), 0);
+    const reserveSummary = useMemo(() => {
+        const income = reserveEntries.filter(r => r.type === 'entrada').reduce((sum, r) => sum + Number(r.value || 0), 0);
+        const expense = reserveEntries.filter(r => r.type === 'saida').reduce((sum, r) => sum + Number(r.value || 0), 0);
+        return { income, expense, balance: income - expense, count: reserveEntries.length };
     }, [reserveEntries]);
-
-    const reserveTotals = useMemo(() => {
-        return reserveEntries.reduce((acc, item) => {
-            const v = Number(item.value || 0);
-            if (item.type === 'guardar') acc.in += v;
-            else acc.out += v;
-            return acc;
-        }, { in: 0, out: 0 });
-    }, [reserveEntries]);
-
-    const saveReserveEntry = () => {
+    const saveReserveMovement = () => {
         const value = parseMoneyValue(reserveForm.value);
         if (!value || value <= 0) {
             showToast('Informe um valor válido para a reserva', 'warning');
             return;
         }
-        const editingOld = editingReserveId ? reserveEntries.find(item => item.id === editingReserveId) : null;
-        const balanceWithoutOld = editingOld
-            ? reserveBalance - (editingOld.type === 'guardar' ? Number(editingOld.value || 0) : -Number(editingOld.value || 0))
-            : reserveBalance;
-        if (reserveForm.type === 'retirar' && value > balanceWithoutOld) {
+        if (reserveForm.type === 'saida' && value > reserveSummary.balance && !editingReserveId) {
             showToast('Valor maior que a reserva disponível', 'warning');
             return;
         }
+        const existing = reserveEntries.find(r => r.id === editingReserveId);
+        const id = editingReserveId || Date.now().toString();
+        const txId = (existing === null || existing === void 0 ? void 0 : existing.txId) || `reserve_tx_${id}`;
+        const reserveType = reserveForm.type === 'saida' ? 'saida' : 'entrada';
         const payload = {
-            id: editingReserveId || Date.now().toString(),
-            type: reserveForm.type === 'retirar' ? 'retirar' : 'guardar',
-            description: (reserveForm.description || '').trim() || (reserveForm.type === 'retirar' ? 'Retirada da reserva' : 'Valor guardado na reserva'),
+            id,
+            type: reserveType,
             value,
             date: normalizeBankDate(reserveForm.date),
-            obs: reserveForm.obs || ''
+            description: String(reserveForm.description || '').trim() || (reserveType === 'saida' ? 'Retirada da reserva' : 'Guardado na reserva'),
+            txId
         };
-        setReserveEntries(prev => editingReserveId
-            ? prev.map(item => item.id === editingReserveId ? payload : item)
-            : [payload, ...prev]);
-        setEditingReserveId(null);
-        setReserveForm({ type: 'guardar', description: '', value: '', date: isoToday(), obs: '' });
-        showToast(editingReserveId ? '✅ Reserva atualizada' : '✅ Reserva salva', 'success');
-    };
-
-    const editReserveEntry = (item) => {
-        setEditingReserveId(item.id);
-        setReserveForm({
-            type: item.type,
-            description: item.description || '',
-            value: String(item.value || ''),
-            date: item.date || isoToday(),
-            obs: item.obs || ''
+        const mirrorTransaction = {
+            id: txId,
+            area: 'pessoal',
+            type: reserveType === 'entrada' ? 'saida' : 'entrada',
+            category: 'Reserva',
+            description: reserveType === 'entrada' ? `Reserva guardada: ${payload.description}` : `Retirada da reserva: ${payload.description}`,
+            value,
+            date: payload.date,
+            obs: 'Movimento automático da aba Reserva',
+            isPersonalExpense: false,
+            syncSource: 'reserve',
+            syncId: id
+        };
+        setReserveEntries(prev => editingReserveId ? prev.map(r => r.id === editingReserveId ? payload : r) : [payload, ...prev]);
+        setTransactions(prev => {
+            const exists = prev.some(t => t.id === txId);
+            return exists ? prev.map(t => t.id === txId ? { ...t, ...mirrorTransaction } : t) : [mirrorTransaction, ...prev];
         });
-        setTab('reserva');
+        setEditingReserveId(null);
+        setReserveForm({ type: 'entrada', value: '', date: payload.date, description: 'Reserva' });
+        showToast(editingReserveId ? '✅ Reserva atualizada' : '✅ Movimento da reserva salvo', 'success');
+    };
+    const editReserveMovement = (item) => {
+        setEditingReserveId(item.id);
+        setReserveForm({ type: item.type, value: String(item.value), date: item.date, description: item.description || 'Reserva' });
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
-
-    const removeReserveEntry = (id) => {
-        setReserveEntries(prev => prev.filter(item => item.id !== id));
-        if (editingReserveId === id) {
-            setEditingReserveId(null);
-            setReserveForm({ type: 'guardar', description: '', value: '', date: isoToday(), obs: '' });
-        }
-        showToast('Reserva removida', 'success');
-    };
-
-    const transferReserveToBalance = (item) => {
-        const payload = {
-            id: Date.now().toString(),
-            area: 'pessoal',
-            type: 'entrada',
-            category: 'Reserva',
-            description: item.description ? `Retirada da reserva: ${item.description}` : 'Retirada da reserva',
-            value: Number(item.value || 0),
-            date: normalizeBankDate(item.date || isoToday()),
-            obs: item.obs || '',
-            isPersonalExpense: false
-        };
-        setTransactions(prev => [payload, ...prev]);
-        showToast('✅ Valor lançado no saldo principal', 'success');
-    };
-
     // ── Save transaction ───────────────────────────────────────────────
     const saveTransaction = () => {
         const value = parseMoneyValue(form.value);
@@ -2260,6 +2228,13 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
         const item = transactions.find(t => t.id === id);
         if ((item === null || item === void 0 ? void 0 : item.syncSource) === 'office') {
             showToast('OS sincronizadas removem-se pela OS.', 'warning');
+            return;
+        }
+        if ((item === null || item === void 0 ? void 0 : item.syncSource) === 'reserve') {
+            setReserveEntries(prev => prev.filter(r => String(r.id) !== String(item.syncId)));
+            setTransactions(prev => prev.filter(t => t.id !== id));
+            setConfirmDelete(null);
+            showToast('🗑️ Movimento da reserva removido', 'success');
             return;
         }
         if ((item === null || item === void 0 ? void 0 : item.syncSource) === 'fixed_bill') {
@@ -3254,55 +3229,14 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
             ['extratos', 'EXTRATOS', 'list'],
             ['fixas', 'FIXAS', 'calendar-clock'],
             ['cartoes', 'CARTÕES', 'credit-card'],
-            ['reserva', 'RESERVA', 'piggy-bank'],
             ['fechamento', 'CAIXA', 'shield'],
+            ['reserva', 'RESERVA', 'shield'],
             ['relatorios', 'RELATÓRIO', 'bar-chart-2']
         ].map(([key, label, icon]) => (React.createElement("button", { key: key, onClick: () => setTab(key), className: `bank-nav-card p-2.5 rounded-xl text-[9px] font-usarmy relative ${tab === key ? 'gold-gradient' : 'aa-card-button'}` },
             key === 'fixas' && urgentCount > 0 && (React.createElement("span", { className: "absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full text-[7px] font-bold text-white flex items-center justify-center" }, urgentCount)),
             React.createElement("div", { className: "flex justify-center mb-0.5" },
                 React.createElement(BankUiIcon, { name: icon, size: 14, color: tab === key ? "#000000" : "#9ca3af" })),
             label)))),
-        tab === 'reserva' && (React.createElement("div", { className: "space-y-4 animate-fadeIn" },
-            React.createElement("div", { className: "aa-card wallet-card wallet-personal rounded-2xl p-5 relative overflow-hidden" },
-                React.createElement("div", { className: "flex items-center gap-2 mb-3" },
-                    React.createElement("div", { className: "aa-icon-badge w-8 h-8 rounded-full flex items-center justify-center" },
-                        React.createElement(BankUiIcon, { name: "piggy-bank", size: 18, color: "#d4af37" })),
-                    React.createElement("span", { className: "text-[10px] font-usarmy" }, "RESERVA")),
-                React.createElement("p", { className: "font-usarmy text-3xl mb-3" }, money(reserveBalance)),
-                React.createElement("div", { className: "flex justify-between text-[10px] font-mono text-gray-500" },
-                    React.createElement("span", { className: "text-green-400" }, "↑ Guardado: ", money(reserveTotals.in)),
-                    React.createElement("span", { className: "text-red-400" }, "↓ Retirado: ", money(reserveTotals.out))),
-                React.createElement("p", { className: "text-[10px] text-gray-500 font-mono mt-3" }, "Este valor fica separado e não entra no saldo principal da dashboard.")),
-            React.createElement("div", { className: "os-card p-4 rounded-xl" },
-                React.createElement("div", { className: "flex items-center gap-2 mb-4" },
-                    React.createElement(BankUiIcon, { name: editingReserveId ? "edit-3" : "plus", size: 18, color: "#d4af37" }),
-                    React.createElement("h3", { className: "font-usarmy text-[#d4af37] text-sm" }, editingReserveId ? "EDITAR RESERVA" : "LANÇAR NA RESERVA")),
-                React.createElement("div", { className: "grid grid-cols-2 gap-3 mb-3" },
-                    React.createElement("button", { onClick: () => setReserveForm(prev => ({ ...prev, type: 'guardar' })), className: `p-4 rounded-xl font-usarmy text-xs border ${reserveForm.type === 'guardar' ? 'gold-gradient' : 'border-white/10 text-gray-400'}` }, "GUARDAR"),
-                    React.createElement("button", { onClick: () => setReserveForm(prev => ({ ...prev, type: 'retirar' })), className: `p-4 rounded-xl font-usarmy text-xs border ${reserveForm.type === 'retirar' ? 'gold-gradient' : 'border-white/10 text-gray-400'}` }, "RETIRAR")),
-                React.createElement("input", { className: "w-full p-3 rounded-xl mb-3 font-mono", placeholder: "Descrição", value: reserveForm.description, onChange: e => setReserveForm(prev => ({ ...prev, description: e.target.value })) }),
-                React.createElement("div", { className: "grid grid-cols-2 gap-3 mb-3" },
-                    React.createElement("input", { className: "w-full p-3 rounded-xl font-mono", inputMode: "decimal", placeholder: "Valor", value: reserveForm.value, onChange: e => setReserveForm(prev => ({ ...prev, value: e.target.value })) }),
-                    React.createElement("input", { className: "w-full p-3 rounded-xl font-mono", type: "date", value: reserveForm.date, onChange: e => setReserveForm(prev => ({ ...prev, date: e.target.value })) })),
-                React.createElement("textarea", { className: "w-full p-3 rounded-xl mb-3 font-mono", rows: 2, placeholder: "Observação", value: reserveForm.obs, onChange: e => setReserveForm(prev => ({ ...prev, obs: e.target.value })) }),
-                React.createElement("div", { className: "grid grid-cols-2 gap-3" },
-                    editingReserveId && React.createElement("button", { onClick: () => { setEditingReserveId(null); setReserveForm({ type: 'guardar', description: '', value: '', date: isoToday(), obs: '' }); }, className: "p-3 rounded-xl border border-white/10 text-gray-400 font-usarmy text-xs" }, "CANCELAR"),
-                    React.createElement("button", { onClick: saveReserveEntry, className: `${editingReserveId ? '' : 'col-span-2'} p-3 rounded-xl gold-gradient font-usarmy text-xs` }, editingReserveId ? "SALVAR" : "ADICIONAR"))),
-            React.createElement("div", { className: "space-y-2" },
-                reserveEntries.length === 0
-                    ? React.createElement("div", { className: "os-card p-4 rounded-xl text-center text-gray-500 font-mono text-xs" }, "Nenhum valor na reserva.")
-                    : reserveEntries.map(item => React.createElement("div", { key: item.id, className: "os-card p-3 rounded-xl" },
-                        React.createElement("div", { className: "flex justify-between gap-3" },
-                            React.createElement("div", { className: "min-w-0" },
-                                React.createElement("p", { className: `font-usarmy text-sm ${item.type === 'guardar' ? 'text-green-400' : 'text-red-400'}` }, item.type === 'guardar' ? "GUARDADO" : "RETIRADO"),
-                                React.createElement("p", { className: "text-gray-300 text-sm truncate" }, item.description),
-                                React.createElement("p", { className: "text-[10px] text-gray-500 font-mono" }, item.date ? new Date(item.date + 'T00:00:00').toLocaleDateString('pt-BR') : "-")),
-                            React.createElement("div", { className: "text-right" },
-                                React.createElement("p", { className: `font-usarmy text-sm ${item.type === 'guardar' ? 'text-green-400' : 'text-red-400'}` }, money(item.value)),
-                                React.createElement("div", { className: "flex gap-2 justify-end mt-2" },
-                                    item.type === 'retirar' && React.createElement("button", { onClick: () => transferReserveToBalance(item), className: "px-2 py-1 rounded-lg border border-green-500/40 text-green-400 text-[9px] font-usarmy" }, "SALDO"),
-                                    React.createElement("button", { onClick: () => editReserveEntry(item), className: "px-2 py-1 rounded-lg border border-white/10 text-gray-400 text-[9px] font-usarmy" }, "EDITAR"),
-                                    React.createElement("button", { onClick: () => removeReserveEntry(item.id), className: "px-2 py-1 rounded-lg border border-red-500/30 text-red-400 text-[9px] font-usarmy" }, "X"))))))))),
         tab === 'dashboard' && (React.createElement("div", { className: "space-y-4 animate-fadeIn" },
             React.createElement(MonthNav, null),
             React.createElement("div", { className: "grid grid-cols-1 gap-3" },
@@ -3832,6 +3766,39 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                React.createElement("p", { className: "text-[9px] font-usarmy", style: { color: tacticalPressure.color } }, "AN\u00C1LISE AUTOM\u00C1TICA V14"),
                 React.createElement("p", { className: "text-sm font-bold text-white mt-1" }, tacticalPressure.label),
                 React.createElement("p", { className: "text-[10px] text-gray-500 mt-2" }, tacticalPressure.hint)))),
+        tab === 'reserva' && (React.createElement("div", { className: "space-y-4 animate-fadeIn" },
+            React.createElement("div", { className: "aa-card wallet-card wallet-personal rounded-2xl p-5 relative overflow-hidden" },
+                React.createElement("div", { className: "flex items-center gap-2 mb-3 justify-center" },
+                    React.createElement("div", { className: "aa-icon-badge w-7 h-7 rounded-full flex items-center justify-center" },
+                        React.createElement(BankUiIcon, { name: "shield", size: 16, color: "#d4af37" })),
+                    React.createElement("span", { className: "text-[10px] font-usarmy" }, "RESERVA")),
+                React.createElement("p", { className: "font-usarmy text-2xl mb-2" }, money(reserveSummary.balance)),
+                React.createElement("div", { className: "flex justify-between text-[9px] font-mono text-gray-500" },
+                    React.createElement("span", { className: "text-green-400" }, "↑ Guardado ", money(reserveSummary.income)),
+                    React.createElement("span", { className: "text-red-400" }, "↓ Retirado ", money(reserveSummary.expense)))),
+            React.createElement("div", { className: "os-card p-5 rounded-xl" },
+                React.createElement("p", { className: "font-usarmy text-[#d4af37] text-sm mb-4" }, editingReserveId ? "EDITAR RESERVA" : "+ MOVIMENTAR RESERVA"),
+                React.createElement("p", { className: "text-[9px] text-gray-500 font-mono mb-2" }, "TIPO"),
+                React.createElement("div", { className: "grid grid-cols-2 gap-3 mb-4" },
+                    React.createElement("button", { onClick: () => setReserveForm(prev => ({ ...prev, type: 'entrada' })), className: `p-4 rounded-2xl font-usarmy text-xs border ${reserveForm.type === 'entrada' ? 'border-green-500 bg-green-500/10 text-green-400' : 'border-white/10 text-gray-400'}` }, "GUARDAR"),
+                    React.createElement("button", { onClick: () => setReserveForm(prev => ({ ...prev, type: 'saida' })), className: `p-4 rounded-2xl font-usarmy text-xs border ${reserveForm.type === 'saida' ? 'border-red-400 bg-red-500/10 text-red-400' : 'border-white/10 text-gray-400'}` }, "RETIRAR")),
+                React.createElement("div", { className: "space-y-3" },
+                    React.createElement("input", { type: "text", inputMode: "decimal", className: "w-full p-4 rounded-xl font-mono", placeholder: "Valor da reserva", value: reserveForm.value, onChange: e => setReserveForm(prev => ({ ...prev, value: e.target.value })) }),
+                    React.createElement("input", { type: "date", className: "w-full p-4 rounded-xl font-mono", value: reserveForm.date, onChange: e => setReserveForm(prev => ({ ...prev, date: e.target.value })) }),
+                    React.createElement("input", { className: "w-full p-4 rounded-xl", placeholder: "Descrição", value: reserveForm.description, onChange: e => setReserveForm(prev => ({ ...prev, description: e.target.value })) }),
+                    React.createElement("div", { className: "grid grid-cols-2 gap-3" },
+                        editingReserveId && React.createElement("button", { onClick: () => { setEditingReserveId(null); setReserveForm({ type: 'entrada', value: '', date: isoToday(), description: 'Reserva' }); }, className: "p-3 rounded-xl border border-white/10 text-gray-400 font-usarmy text-xs" }, "CANCELAR"),
+                        React.createElement("button", { onClick: saveReserveMovement, className: `gold-gradient p-3 rounded-xl font-usarmy text-xs ${editingReserveId ? '' : 'col-span-2'}` }, editingReserveId ? "SALVAR" : "LANÇAR")))),
+            React.createElement("div", { className: "space-y-3" },
+                reserveEntries.length === 0 && React.createElement("div", { className: "os-card p-4 rounded-xl text-center text-gray-500 text-xs font-mono" }, "Nenhum valor na reserva ainda."),
+                reserveEntries.map(item => React.createElement("div", { key: item.id, className: "os-card p-4 rounded-xl flex items-center justify-between gap-3" },
+                    React.createElement("div", { className: "min-w-0" },
+                        React.createElement("p", { className: `font-usarmy text-sm ${item.type === 'entrada' ? 'text-green-400' : 'text-red-400'}` }, item.type === 'entrada' ? "GUARDADO" : "RETIRADO"),
+                        React.createElement("p", { className: "text-xs text-gray-400 truncate" }, item.description),
+                        React.createElement("p", { className: "text-[10px] text-gray-500 font-mono" }, normalizeBankDate(item.date))),
+                    React.createElement("div", { className: "text-right flex-shrink-0" },
+                        React.createElement("p", { className: "font-usarmy text-[#d4af37] text-sm" }, money(item.value)),
+                        React.createElement("button", { onClick: () => editReserveMovement(item), className: "mt-2 px-3 py-2 rounded-xl border border-[#d4af37]/50 text-[#d4af37] font-usarmy text-[10px]" }, "EDITAR"))))))),
         tab === 'relatorios' && (React.createElement("div", { className: "space-y-4 animate-fadeIn" },
             React.createElement(MonthNav, null),
             React.createElement("div", { className: "os-card p-4 rounded-xl" },
@@ -3910,56 +3877,60 @@ SafeStorage.ready.finally(() => {
 </script>
 
         <script>
-(function(){
-    const APP_VERSION = '20260605-reserva-final-install-1';
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-            navigator.serviceWorker.register('./sw.js?v=' + APP_VERSION, { scope: './' })
-                .then(function(registration) {
-                    if (registration.waiting) registration.waiting.postMessage({type:'SKIP_WAITING'});
-                    console.log('Service Worker registrado:', registration.scope);
-                })
-                .catch(function(error) {
-                    console.warn('Falha ao registrar Service Worker:', error);
-                });
+        // Service Worker para PWA/APK
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(function(registration) {
+                        console.log('Service Worker registrado:', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('Falha ao registrar Service Worker:', error);
+                    });
+            });
+        }
+
+        // Botão de instalação PWA
+        let deferredInstallPrompt = null;
+        window.addEventListener('beforeinstallprompt', function(event) {
+            event.preventDefault();
+            deferredInstallPrompt = event;
+            const container = document.getElementById('install-container');
+            if (!container || document.getElementById('install-pwa-btn')) return;
+            const button = document.createElement('button');
+            button.id = 'install-pwa-btn';
+            button.className = 'install-prompt';
+            button.type = 'button';
+            button.textContent = 'INSTALAR MY BANK';
+            button.onclick = async function() {
+                if (!deferredInstallPrompt) return;
+                deferredInstallPrompt.prompt();
+                await deferredInstallPrompt.userChoice.catch(function(){});
+                deferredInstallPrompt = null;
+                button.remove();
+            };
+            container.appendChild(button);
         });
-    }
 
-    let deferredInstallPrompt = null;
-    function showInstallButton() {
-        const container = document.getElementById('install-container');
-        if (!container || document.getElementById('install-pwa-btn')) return;
-        const button = document.createElement('button');
-        button.id = 'install-pwa-btn';
-        button.className = 'install-prompt';
-        button.type = 'button';
-        button.textContent = 'INSTALAR MY BANK';
-        button.onclick = async function() {
-            if (!deferredInstallPrompt) {
-                alert('Abra pelo Chrome em HTTPS e aguarde alguns segundos. Se já estiver instalado, o botão não aparece.');
-                return;
-            }
-            deferredInstallPrompt.prompt();
-            await deferredInstallPrompt.userChoice.catch(function(){});
+        window.addEventListener('appinstalled', function() {
+            const button = document.getElementById('install-pwa-btn');
+            if (button) button.remove();
             deferredInstallPrompt = null;
-            button.remove();
-        };
-        container.appendChild(button);
-    }
+        });
 
-    window.addEventListener('beforeinstallprompt', function(event) {
-        event.preventDefault();
-        deferredInstallPrompt = event;
-        showInstallButton();
-    });
-
-    window.addEventListener('appinstalled', function() {
-        const button = document.getElementById('install-pwa-btn');
-        if (button) button.remove();
-        deferredInstallPrompt = null;
-    });
-})();
-</script>
+        // Inicializa ícones Lucide
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                if (typeof lucide !== 'undefined') {
+                    try {
+                        lucide.createIcons();
+                    } catch (e) {
+                        console.log('Erro ao criar ícones iniciais:', e);
+                    }
+                }
+            }, 500);
+        });
+    </script>
 
 
 <!-- PATCH ALCANTARA: recarrega ícones Lucide após navegação interna da Tech -->
