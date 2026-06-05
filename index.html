@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Bank</title>
+    <meta name="application-name" content="My Bank">
 
     <!-- PWA Meta Tags Otimizadas -->
     <meta name="mobile-web-app-capable" content="yes">
@@ -3772,7 +3773,7 @@ SafeStorage.ready.finally(() => {
         // Service Worker para PWA/APK
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
-                navigator.serviceWorker.register('./sw.js')
+                navigator.serviceWorker.register('./sw.js', { scope: './' })
                     .then(function(registration) {
                         console.log('Service Worker registrado:', registration.scope);
                     })
