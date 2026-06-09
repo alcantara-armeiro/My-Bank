@@ -4,9 +4,9 @@ const ASSETS = [
   './arquivo.html',
   './manifest.json',
   './sw.js',
-  './icons/icon-192x192.png',
-  './icons/icon-512x512.png',
-  './icons/logo.png'
+  './îcons/icon-192x192.png',
+  './îcons/icon-512x512.png',
+  './îcons/logo.png'
 ];
 
 self.addEventListener('install', event => {
