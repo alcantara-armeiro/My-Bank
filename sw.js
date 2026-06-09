@@ -1,20 +1,17 @@
-const CACHE_NAME = 'my-bank-pwa-v20260609-02';
-
-const ASSETS = [
+// My Bank Service Worker - força atualização do app instalado
+const APP_VERSION = '20260609-card-limit-2';
+const CACHE_NAME = `my-bank-${APP_VERSION}`;
+const APP_SHELL = [
   './',
   './index.html',
-  './manifest.json',
-  './sw.js',
-  './icons/icon-192x192.png',
-  './icons/icon-512x512.png',
-  './icons/logo.png'
+  './arquivo.html',
+  './manifest.json'
 ];
 
 self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => Promise.allSettled(ASSETS.map(url => cache.add(url))))
-      .then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL).catch(() => null))
   );
 });
 
@@ -27,15 +24,36 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return;
+  const req = event.request;
+  if (req.method !== 'GET') return;
+
+  const url = new URL(req.url);
+  const isNavigation = req.mode === 'navigate' || req.destination === 'document';
+
+  // HTML sempre tenta rede primeiro para o PWA instalado receber alterações novas.
+  if (isNavigation) {
+    event.respondWith(
+      fetch(req, { cache: 'no-store' })
+        .then(res => {
+          const copy = res.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put('./', copy)).catch(() => null);
+          return res;
+        })
+        .catch(() => caches.match('./').then(cached => cached || caches.match('./index.html')))
+    );
+    return;
+  }
+
+  // Assets: tenta rede, salva versão nova, usa cache se estiver offline.
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(response => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy)).catch(() => {});
-        return response;
-      }).catch(() => caches.match('./index.html'));
-    })
+    fetch(req)
+      .then(res => {
+        const copy = res.clone();
+        if (url.origin === self.location.origin) {
+          caches.open(CACHE_NAME).then(cache => cache.put(req, copy)).catch(() => null);
+        }
+        return res;
+      })
+      .catch(() => caches.match(req))
   );
 });
