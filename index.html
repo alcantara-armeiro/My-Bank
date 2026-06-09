@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Bank</title>
+    
+    <!-- Manifesto PWA -->
+    <link rel="manifest" href="manifest.json"/>
+
 
     <!-- PWA Meta Tags Otimizadas -->
     <meta name="mobile-web-app-capable" content="yes">
@@ -30,9 +34,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16x16.png">
 
-    <!-- Manifesto PWA -->
-    <link rel="manifest" href="./manifest.json">
-
+    
     <!-- Scripts -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -1182,6 +1184,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
     const [billForm, setBillForm] = useState({ name: '', value: '', date: isoToday(), area: 'pessoal', active: true });
     const [cards, setCards] = useState(() => normalizeCards(safeJsonParse(SafeStorage.getItem('alcantara_bank_cards'), [])));
     const [cardEntries, setCardEntries] = useState(() => normalizeCardEntries(safeJsonParse(SafeStorage.getItem('alcantara_bank_card_entries'), [])));
+    const [cardInvoicePaid, setCardInvoicePaid] = useState(() => safeJsonParse(SafeStorage.getItem('alcantara_bank_card_invoice_paid'), {}));
     const normalizeReserveEntries = (value) => asArray(value).map((item, index) => ({
         id: String((item === null || item === void 0 ? void 0 : item.id) || `reserve_${Date.now()}_${index}`),
         type: (item === null || item === void 0 ? void 0 : item.type) === 'saida' ? 'saida' : 'entrada',
@@ -1619,6 +1622,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
     useEffect(() => { SafeStorage.setItem('alcantara_bank_withdrawal_limit', JSON.stringify(Number(withdrawalLimit) > 0 ? Number(withdrawalLimit) : 800)); }, [withdrawalLimit]);
     useEffect(() => { SafeStorage.setItem('alcantara_bank_cards', JSON.stringify(normalizeCards(cards))); }, [cards]);
     useEffect(() => { SafeStorage.setItem('alcantara_bank_card_entries', JSON.stringify(normalizeCardEntries(cardEntries))); }, [cardEntries]);
+    useEffect(() => { SafeStorage.setItem('alcantara_bank_card_invoice_paid', JSON.stringify(cardInvoicePaid || {})); }, [cardInvoicePaid]);
     useEffect(() => { SafeStorage.setItem('alcantara_bank_reserve', JSON.stringify(normalizeReserveEntries(reserveEntries))); }, [reserveEntries]);
     useEffect(() => { SafeStorage.setItem('alcantara_bank_debt_plan', JSON.stringify(normalizeDebtPlanState(debtPlanData))); }, [debtPlanData]);
     // ── Icon refresh ───────────────────────────────────────────────────
@@ -2401,6 +2405,14 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
         recurringGroupId: ''
     };
     const selectedCard = useMemo(() => cards.find(c => c.id === selectedCardId) || null, [cards, selectedCardId]);
+    const getCardInvoicePaidKey = (cardId, month = selectedMonth) => `${cardId || ''}_${month || currentYM}`;
+    const isCardInvoicePaid = (cardId, month = selectedMonth) => !!(cardInvoicePaid && cardInvoicePaid[getCardInvoicePaidKey(cardId, month)]);
+    const toggleCardInvoicePaid = (cardId, month = selectedMonth) => {
+        if (!cardId)
+            return;
+        const key = getCardInvoicePaidKey(cardId, month);
+        setCardInvoicePaid(prev => ({ ...(prev || {}), [key]: !(prev && prev[key]) }));
+    };
     const [cardForm, setCardForm] = useState(emptyCardForm);
     const [cardEntryForm, setCardEntryForm] = useState(emptyCardEntryForm);
     const handleCardAreaChange = (area) => {
@@ -2593,6 +2605,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
     const removeCard = (cardId) => {
         setCards(prev => prev.filter(card => card.id !== cardId));
         setCardEntries(prev => prev.filter(entry => entry.cardId !== cardId));
+        setCardInvoicePaid(prev => Object.fromEntries(Object.entries(prev || {}).filter(([key]) => !key.startsWith(`${cardId}_`))));
         if (selectedCardId === cardId) {
             setSelectedCardId(null);
             setShowCardEntryForm(false);
@@ -3533,6 +3546,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                         const monthEntries = cardEntries.filter(entry => entry.cardId === card.id && (entry.area || 'pessoal') === 'pessoal' && getCardInvoiceMonth(entry, card) === selectedMonth);
                         const cardTotal = monthEntries.reduce((s, entry) => s + Number(entry.value || 0), 0);
                         const cardCount = monthEntries.length;
+                        const invoicePaid = isCardInvoicePaid(card.id, selectedMonth);
                         return (React.createElement("div", { key: card.id, className: "os-card p-3 rounded-xl border border-white/5" },
                             React.createElement("div", { className: "flex items-start justify-between gap-3" },
                                 React.createElement("button", { onClick: () => { setSelectedCardId(card.id); setShowCardEntryForm(false); setEditingCardEntryId(null); setCardEntryForm(emptyCardEntryForm); }, className: "flex-1 text-left flex items-start gap-3" },
@@ -3547,7 +3561,8 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                                                 card.final),
                                             React.createElement("span", { className: "text-[8px] px-1.5 py-0.5 rounded-full bg-white/5 text-gray-500 border border-white/10" },
                                                 cardCount,
-                                                " fat. m\u00EAs")),
+                                                " fat. m\u00EAs"),
+                                            invoicePaid && React.createElement("span", { className: "text-[8px] font-bold px-1.5 py-0.5 rounded-full border text-emerald-400 bg-emerald-500/10 border-emerald-500/30" }, "PAGO")),
                                         card.limit ? React.createElement("p", { className: "text-[10px] text-gray-500 mt-1" },
                                             "Limite: ",
                                             money(card.limit)) : null,
@@ -3563,6 +3578,8 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                                 React.createElement("div", { className: "text-right flex-shrink-0" },
                                     React.createElement("p", { className: "font-usarmy text-red-400 text-sm" }, money(cardTotal)),
                                     React.createElement("div", { className: "flex gap-1 mt-2 justify-end" },
+                                        React.createElement("button", { onClick: () => toggleCardInvoicePaid(card.id, selectedMonth), className: `btn-icon w-8 h-8 ${invoicePaid ? 'text-emerald-400' : 'text-gray-400'}`, "aria-label": invoicePaid ? "Desmarcar fatura como paga" : "Marcar fatura como paga", title: invoicePaid ? "Desmarcar pago" : "Marcar pago" },
+                                            React.createElement(BankUiIcon, { name: "check", size: 14, color: invoicePaid ? "#22c55e" : "#9ca3af" })),
                                         React.createElement("button", { onClick: () => editCard(card), className: "btn-icon text-[#d4af37] w-8 h-8", "aria-label": "Editar cart\u00E3o" },
                                             React.createElement(BankUiIcon, { name: "pencil", size: 14, color: "#d4af37" })),
                                         React.createElement("button", { onClick: () => setConfirmDeleteCard(card.id), className: "btn-icon text-red-500 w-8 h-8", "aria-label": "Excluir cart\u00E3o" },
