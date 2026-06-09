@@ -2,7 +2,7 @@
   "name": "My Bank",
   "short_name": "My Bank",
   "description": "Gestão Financeira My Bank",
-  "start_url": "./arquivo.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "display_override": [
