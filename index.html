@@ -2778,6 +2778,19 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
             return acc;
         }, { total: 0, pessoal: 0, oficina: 0 });
     }, [selectedCardEntriesForMonth]);
+    const getCardAvailableLimit = (card) => {
+        const limit = Number((card && card.limit) || 0);
+        if (!limit)
+            return 0;
+        const usedUnpaid = cardEntries
+            .filter(entry => entry.cardId === card.id && (entry.area || 'pessoal') === 'pessoal')
+            .reduce((sum, entry) => {
+            const invoiceMonth = getCardInvoiceMonth(entry, card);
+            return isCardInvoicePaid(card.id, invoiceMonth) ? sum : sum + Number(entry.value || 0);
+        }, 0);
+        return Math.max(limit - usedUnpaid, 0);
+    };
+    const selectedCardAvailableLimit = selectedCard ? getCardAvailableLimit(selectedCard) : 0;
     const fixedBillsForSelectedMonth = useMemo(() => fixedBills
         .filter(b => (b.area || 'pessoal') === 'pessoal')
         .filter(b => b.active !== false && compareYM(selectedMonth, getBillStartMonth(b)) >= 0)
@@ -3582,8 +3595,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                     cards.map(card => {
                         const monthEntries = cardEntries.filter(entry => entry.cardId === card.id && (entry.area || 'pessoal') === 'pessoal' && getCardInvoiceMonth(entry, card) === selectedMonth);
                         const cardTotal = monthEntries.reduce((s, entry) => s + Number(entry.value || 0), 0);
-                        const cardLimit = Number(card.limit || 0);
-                        const cardAvailableLimit = cardLimit > 0 ? Math.max(cardLimit - cardTotal, 0) : 0;
+                        const cardAvailableLimit = getCardAvailableLimit(card);
                         const cardCount = monthEntries.length;
                         const invoicePaid = isCardInvoicePaid(card.id, selectedMonth);
                         return (React.createElement("div", { key: card.id, className: "os-card p-3 rounded-xl border border-white/5" },
@@ -3660,7 +3672,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                         React.createElement("p", { className: "font-usarmy text-indigo-300 text-sm" }, money(selectedCardSummary.pessoal))),
                     React.createElement("div", { className: "os-card p-3 rounded-xl text-center" },
                         React.createElement("p", { className: "text-[8px] text-gray-500 font-mono" }, "DISPONÍVEL"),
-                        React.createElement("p", { className: `font-usarmy text-sm ${Number(selectedCard.limit || 0) - selectedCardSummary.total <= 0 ? 'text-red-400' : 'text-emerald-400'}` }, Number(selectedCard.limit || 0) ? money(Math.max(Number(selectedCard.limit || 0) - selectedCardSummary.total, 0)) : '—'))),
+                        React.createElement("p", { className: `font-usarmy text-sm ${selectedCardAvailableLimit <= 0 ? 'text-red-400' : 'text-emerald-400'}` }, Number(selectedCard.limit || 0) ? money(selectedCardAvailableLimit) : '—'))),
                 (selectedCard.brand || selectedCard.final || selectedCard.limit || selectedCard.dueDay || selectedCard.closingDay || selectedCard.bestPurchaseDay) && (React.createElement("div", { className: "os-card p-3 rounded-xl" },
                     React.createElement("div", { className: "flex flex-wrap items-center gap-2" },
                         selectedCard.brand && React.createElement("span", { className: "text-[8px] px-2 py-1 rounded-full bg-white/5 text-gray-400 border border-white/10" }, selectedCard.brand),
@@ -3673,7 +3685,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                                 money(selectedCard.limit)),
                             React.createElement("span", { className: "text-[8px] px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30" },
                                 "DISPONÍVEL ",
-                                money(Math.max(Number(selectedCard.limit || 0) - selectedCardSummary.total, 0)))),
+                                money(selectedCardAvailableLimit))),
                         selectedCard.dueDay && React.createElement("span", { className: "text-[8px] px-2 py-1 rounded-full bg-white/5 text-gray-400 border border-white/10" },
                             "VENCE DIA ",
                             String(selectedCard.dueDay).padStart(2, '0')),
