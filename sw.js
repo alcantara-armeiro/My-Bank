@@ -1,18 +1,19 @@
-const CACHE_NAME = 'my-bank-pwa-v20260609-01';
+const CACHE_NAME = 'my-bank-pwa-v20260609-02';
+
 const ASSETS = [
   './',
   './arquivo.html',
   './manifest.json',
   './sw.js',
-  './îcons/icon-192x192.png',
-  './îcons/icon-512x512.png',
-  './îcons/logo.png'
+  './icons/icon-192x192.png',
+  './icons/icon-512x512.png',
+  './icons/logo.png'
 ];
 
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(ASSETS))
+      .then(cache => Promise.allSettled(ASSETS.map(url => cache.add(url))))
       .then(() => self.skipWaiting())
   );
 });
@@ -27,16 +28,14 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
-
   event.respondWith(
     caches.match(event.request).then(cached => {
       if (cached) return cached;
-
       return fetch(event.request).then(response => {
         const copy = response.clone();
         caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy)).catch(() => {});
         return response;
-      }).catch(() => cached);
+      }).catch(() => caches.match('./arquivo.html'));
     })
   );
 });
