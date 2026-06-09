@@ -2257,6 +2257,23 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
             showToast('🗑️ Movimento da reserva removido', 'success');
             return;
         }
+        if ((item === null || item === void 0 ? void 0 : item.syncSource) === 'card_invoice') {
+            const syncMatch = String(item.syncId || '').match(/^card_invoice_(.+)_([0-9]{4}-[0-9]{2})$/);
+            const cardId = syncMatch ? syncMatch[1] : null;
+            const cardMonth = syncMatch ? syncMatch[2] : null;
+            setTransactions(prev => prev.filter(t => t.id !== id));
+            if (cardId && cardMonth) {
+                const paidKey = getCardInvoicePaidKey(cardId, cardMonth);
+                setCardInvoicePaid(prev => {
+                    const next = { ...(prev || {}) };
+                    delete next[paidKey];
+                    return next;
+                });
+            }
+            setConfirmDelete(null);
+            showToast('🗑️ Lançamento removido e fatura desmarcada', 'success');
+            return;
+        }
         if ((item === null || item === void 0 ? void 0 : item.syncSource) === 'fixed_bill') {
             const syncMatch = String(item.syncId || '').match(/^fixed_bill_(.+)_([0-9]{4}-[0-9]{2})$/);
             const billId = syncMatch ? syncMatch[1] : null;
@@ -2406,12 +2423,56 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
     };
     const selectedCard = useMemo(() => cards.find(c => c.id === selectedCardId) || null, [cards, selectedCardId]);
     const getCardInvoicePaidKey = (cardId, month = selectedMonth) => `${cardId || ''}_${month || currentYM}`;
+    const getCardInvoiceSyncId = (cardId, month = selectedMonth) => `card_invoice_${cardId || ''}_${month || currentYM}`;
     const isCardInvoicePaid = (cardId, month = selectedMonth) => !!(cardInvoicePaid && cardInvoicePaid[getCardInvoicePaidKey(cardId, month)]);
     const toggleCardInvoicePaid = (cardId, month = selectedMonth) => {
         if (!cardId)
             return;
-        const key = getCardInvoicePaidKey(cardId, month);
-        setCardInvoicePaid(prev => ({ ...(prev || {}), [key]: !(prev && prev[key]) }));
+        const card = cards.find(item => String(item.id) === String(cardId));
+        if (!card) {
+            showToast('Cartão não encontrado', 'warning');
+            return;
+        }
+        const paidKey = getCardInvoicePaidKey(cardId, month);
+        const syncId = getCardInvoiceSyncId(cardId, month);
+        const alreadyPaid = isCardInvoicePaid(cardId, month);
+        if (alreadyPaid) {
+            setCardInvoicePaid(prev => {
+                const next = { ...(prev || {}) };
+                delete next[paidKey];
+                return next;
+            });
+            setTransactions(prev => prev.filter(t => !(t.syncSource === 'card_invoice' && String(t.syncId) === syncId)));
+            showToast('↩️ Fatura desmarcada e valor devolvido ao saldo', 'info');
+            return;
+        }
+        const invoiceEntries = cardEntries.filter(entry => String(entry.cardId) === String(cardId) && (entry.area || 'pessoal') === 'pessoal' && getCardInvoiceMonth(entry, card) === month);
+        const invoiceTotal = Math.round(invoiceEntries.reduce((sum, entry) => sum + Number(entry.value || 0), 0) * 100) / 100;
+        if (!invoiceTotal || invoiceTotal <= 0) {
+            showToast('Essa fatura não tem valor para descontar', 'warning');
+            return;
+        }
+        const dueDate = getCardInvoiceDueDate(card, month);
+        const paymentDate = dueDate ? dueDate.toISOString().slice(0, 10) : `${month || currentYM}-01`;
+        const autoTransaction = {
+            id: 'card_tx_' + syncId,
+            syncId,
+            syncSource: 'card_invoice',
+            area: 'pessoal',
+            type: 'saida',
+            category: 'Cartão de Crédito',
+            description: `Fatura cartão: ${card.name}`,
+            value: invoiceTotal,
+            date: paymentDate,
+            obs: `Lançamento automático da fatura ${month || currentYM}`,
+            isPersonalExpense: true
+        };
+        setCardInvoicePaid(prev => ({ ...(prev || {}), [paidKey]: true }));
+        setTransactions(prev => {
+            const cleaned = prev.filter(t => !(t.syncSource === 'card_invoice' && String(t.syncId) === syncId));
+            return [autoTransaction, ...cleaned];
+        });
+        showToast('✅ Fatura paga e descontada do saldo', 'success');
     };
     const [cardForm, setCardForm] = useState(emptyCardForm);
     const [cardEntryForm, setCardEntryForm] = useState(emptyCardEntryForm);
@@ -2606,6 +2667,7 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
         setCards(prev => prev.filter(card => card.id !== cardId));
         setCardEntries(prev => prev.filter(entry => entry.cardId !== cardId));
         setCardInvoicePaid(prev => Object.fromEntries(Object.entries(prev || {}).filter(([key]) => !key.startsWith(`${cardId}_`))));
+        setTransactions(prev => prev.filter(t => !(t.syncSource === 'card_invoice' && String(t.syncId || '').startsWith(`card_invoice_${cardId}_`))));
         if (selectedCardId === cardId) {
             setSelectedCardId(null);
             setShowCardEntryForm(false);
@@ -3382,7 +3444,8 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                                     React.createElement("span", { className: "text-[8px] px-1.5 py-0.5 rounded-full bg-white/5 text-gray-500 border border-white/10" }, t.category),
                                     isPE && t.area === 'oficina' && (React.createElement("span", { className: "text-[8px] px-1.5 py-0.5 rounded-full font-bold border", style: { color: '#a855f7', background: 'rgba(168,85,247,0.1)', borderColor: 'rgba(168,85,247,0.3)' } }, "PESSOAL")),
                                     t.syncSource === 'office' && (React.createElement("span", { className: "text-[8px] px-1.5 py-0.5 rounded-full font-bold border text-blue-400 bg-blue-500/10 border-blue-500/30" }, "SYNC")),
-                                    t.syncSource === 'fixed_bill' && (React.createElement("span", { className: "text-[8px] px-1.5 py-0.5 rounded-full font-bold border text-emerald-400 bg-emerald-500/10 border-emerald-500/30" }, "FIXA"))),
+                                    t.syncSource === 'fixed_bill' && (React.createElement("span", { className: "text-[8px] px-1.5 py-0.5 rounded-full font-bold border text-emerald-400 bg-emerald-500/10 border-emerald-500/30" }, "FIXA")),
+                                    t.syncSource === 'card_invoice' && (React.createElement("span", { className: "text-[8px] px-1.5 py-0.5 rounded-full font-bold border text-rose-400 bg-rose-500/10 border-rose-500/30" }, "CARTÃO"))),
                                 React.createElement("p", { className: "text-sm font-semibold text-white truncate" }, displayDescription),
                                 React.createElement("p", { className: "text-[10px] text-gray-500 mt-0.5" }, (_a = t.date) === null || _a === void 0 ? void 0 :
                                     _a.split('-').reverse().join('/'),
