@@ -6,7 +6,7 @@
     <title>My Bank</title>
     
     <!-- Manifesto PWA -->
-    <link rel="manifest" href="manifest.json"/>
+    <link rel="manifest" href="./manifest.json">
 
 
     <!-- PWA Meta Tags Otimizadas -->
@@ -4016,6 +4016,57 @@ SafeStorage.ready.finally(() => {
     setTimeout(function(){ if(s && s.parentNode) s.parentNode.removeChild(s); },800);
   }
   window.addEventListener('load',function(){ setTimeout(hideSplash,1800); });
+})();
+</script>
+
+
+<script id="pwa-install-fix">
+(function () {
+  'use strict';
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js', { scope: './' })
+        .then(function (registration) {
+          console.log('My Bank PWA ativo:', registration.scope);
+        })
+        .catch(function (error) {
+          console.error('Erro ao registrar o Service Worker:', error);
+        });
+    });
+  }
+
+  let deferredInstallPrompt = null;
+
+  window.addEventListener('beforeinstallprompt', function (event) {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+
+    if (document.getElementById('install-pwa-btn')) return;
+
+    const container = document.getElementById('install-container') || document.body;
+    const button = document.createElement('button');
+    button.id = 'install-pwa-btn';
+    button.type = 'button';
+    button.className = 'install-prompt';
+    button.textContent = 'INSTALAR MY BANK';
+
+    button.addEventListener('click', async function () {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      try { await deferredInstallPrompt.userChoice; } catch (e) {}
+      deferredInstallPrompt = null;
+      button.remove();
+    });
+
+    container.appendChild(button);
+  });
+
+  window.addEventListener('appinstalled', function () {
+    const button = document.getElementById('install-pwa-btn');
+    if (button) button.remove();
+    deferredInstallPrompt = null;
+  });
 })();
 </script>
 
