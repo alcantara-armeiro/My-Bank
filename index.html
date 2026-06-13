@@ -2204,6 +2204,17 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
         setReserveForm({ type: item.type, value: String(item.value), date: item.date, description: item.description || 'Reserva' });
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
+    const deleteReserveMovement = (item) => {
+        const labelValue = money(Number(item.value || 0));
+        if (!window.confirm(`Excluir movimentação da reserva de ${labelValue}?`)) return;
+        setReserveEntries(prev => prev.filter(r => r.id !== item.id));
+        setTransactions(prev => prev.filter(t => t.id !== item.txId && t.syncId !== item.id));
+        if (editingReserveId === item.id) {
+            setEditingReserveId(null);
+            setReserveForm({ type: 'entrada', value: '', date: isoToday(), description: 'Reserva' });
+        }
+        showToast('🗑️ Movimento da reserva excluído', 'success');
+    };
     // ── Save transaction ───────────────────────────────────────────────
     const saveTransaction = () => {
         const value = parseMoneyValue(form.value);
@@ -3870,9 +3881,10 @@ const AlcantaraBankIntegrated = ({ orders, onBack, onOpenOrder }) => {
                         React.createElement("p", { className: `font-usarmy text-sm ${item.type === 'entrada' ? 'text-green-400' : 'text-red-400'}` }, item.type === 'entrada' ? "GUARDADO" : "RETIRADO"),
                         React.createElement("p", { className: "text-xs text-gray-400 truncate" }, item.description),
                         React.createElement("p", { className: "text-[10px] text-gray-500 font-mono" }, normalizeBankDate(item.date))),
-                    React.createElement("div", { className: "text-right flex-shrink-0" },
+                    React.createElement("div", { className: "text-right flex-shrink-0 flex flex-col items-end gap-2" },
                         React.createElement("p", { className: "font-usarmy text-[#d4af37] text-sm" }, money(item.value)),
-                        React.createElement("button", { onClick: () => editReserveMovement(item), className: "mt-2 px-3 py-2 rounded-xl border border-[#d4af37]/50 text-[#d4af37] font-usarmy text-[10px]" }, "EDITAR"))))))),
+                        React.createElement("button", { onClick: () => editReserveMovement(item), className: "px-3 py-2 rounded-xl border border-[#d4af37]/50 text-[#d4af37] font-usarmy text-[10px]" }, "EDITAR"),
+                        React.createElement("button", { onClick: () => deleteReserveMovement(item), className: "px-3 py-2 rounded-xl border border-red-500/60 text-red-400 font-usarmy text-[10px]" }, "EXCLUIR"))))))),
         tab === 'relatorios' && (React.createElement("div", { className: "space-y-4 animate-fadeIn" },
             React.createElement(MonthNav, null),
             React.createElement("div", { className: "os-card p-4 rounded-xl" },
